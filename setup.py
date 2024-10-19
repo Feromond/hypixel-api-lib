@@ -11,8 +11,8 @@ setup(
     url='https://github.com/feromond/hypixel-api-lib',
     packages=find_packages(exclude=['tests']),
     install_requires=[
-        'numpy',  
-        'pandas',
-        'requests',
+        'numpy==2.1.2',  
+        'pandas==2.2.3',
+        'requests==2.32.3',
     ],
 )
