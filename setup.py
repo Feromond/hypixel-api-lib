@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='hypixel-api-lib',  
+    name='hypixel_api_lib',  
     version='0.1.0',
     author='Desmond O, Jacob M',
     author_email='JacobPMish@gmail.com, desmond.obrien@ucalgary.ca',
