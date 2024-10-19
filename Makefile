@@ -11,3 +11,6 @@ build_local:
 build:
 	echo "Building Distribution Of Library"
 	python3 setup.py bdist_wheel
+destroy:
+	echo "Uninstalling Local Build Of Library"
+	pip3 uninstall geophysics_lib
