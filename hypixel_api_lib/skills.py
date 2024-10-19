@@ -1,6 +1,6 @@
 import requests
 
-SKILLS_API_URL = "https://api.hypixel.net/v2/resources/skyblock/skills"
+SKILLS_API_URL = r"https://api.hypixel.net/v2/resources/skyblock/skills"
 
 class SkillLevel:
     """

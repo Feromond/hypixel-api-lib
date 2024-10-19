@@ -1,4 +1,4 @@
-from hypixel_api_lib.skills import Skills, Skill
+from hypixel_api_lib.Skills import Skills
 
 skills_manager = Skills()
 
