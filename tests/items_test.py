@@ -1,17 +1,30 @@
 from hypixel_api_lib.Items import Items
 
-# Initialize the Items manager
 items_manager = Items()
 
-# Retrieve a specific item by its ID
-item = items_manager.get_item("ASPECT_OF_THE_END")
+item = items_manager.get_item("FARM_ARMOR_CHESTPLATE")
 
 print(f"Item Name: {item.name}")
 print(f"Item Material: {item.material}")
 print(f"Item Tier: {item.tier}")
+print(f"Item Category: {item.category}")
+print(f"Item Stats: {item.stats}")
+print(f"NPC Sell Price: {item.npc_sell_price}")
 
-# Retrieve items with a specific tier
-legendary_items = items_manager.get_items_by_tier("LEGENDARY")
-print(f"Legendary Items: {list(legendary_items.keys())}")
+item_with_skin = items_manager.get_item("MANDRAA")
+
+print(f"\nItem Name: {item_with_skin.name}")
+print(f"Item Material: {item_with_skin.material}")
+print(f"Item Tier: {item_with_skin.tier}")
+print(f"Item Category: {item_with_skin.category}")
+print(f"Item Skin: {item_with_skin.skin}")
+print(f"Item Durability: {item_with_skin.durability}")
+print(f"NPC Sell Price: {item_with_skin.npc_sell_price}")
+
+chestplate_items = items_manager.get_items_by_category("CHESTPLATE")
+print(f"Chestplate Items: {list(chestplate_items.keys())}")
 
 
+all_categories = items_manager.list_item_categories()
+
+print(f"Item Category List: {all_categories}")
