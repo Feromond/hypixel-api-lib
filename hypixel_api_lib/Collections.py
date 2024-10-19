@@ -8,10 +8,10 @@ URL = r"https://api.hypixel.net/v2/resources/skyblock/collections"
 class Collections():
 
 
-    def __init__(self, skills: list[str]) -> None:
-        self._dataset = self._get(skills)
+    def __init__(self) -> None:
+        self._dataset = self._get()
     
-    def _get(self, skills: list[str]) -> None:
+    def _get(self) -> None:
         raw_data = []
         response = requests.get(URL)
         req_body = None
