@@ -10,6 +10,9 @@ setup(
     # long_description_content_type='text/markdown',
     url='https://github.com/feromond/hypixel-api-lib',
     packages=find_packages(exclude=['tests']),
-    # install_requires=[
-    # ],
+    install_requires=[
+        'numpy',  
+        'pandas',
+        'requests',
+    ],
 )
