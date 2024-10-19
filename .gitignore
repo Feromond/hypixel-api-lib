@@ -157,6 +157,8 @@ cython_debug/
 #VsCode User settings
 .vscode/
 
+#CSV files
+*.csv
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
