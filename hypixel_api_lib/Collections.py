@@ -6,8 +6,6 @@ import numpy as np
 URL = r"https://api.hypixel.net/v2/resources/skyblock/collections"
 
 class Collections():
-
-
     def __init__(self) -> None:
         self._dataset = self._get()
     
@@ -35,8 +33,31 @@ class Collections():
                 raw_data.append(sub_body[i])
 
         return pd.DataFrame(raw_data, columns=cols)
-    
 
+
+
+
+class Unlock():
+    def __init(self, num: int, descr: str):
+        self.num = num
+        self.descr = descr
+
+class Tier():
+    def __init__(self, num: int, amount_requried: str, unlocks: list[Unlock]):
+        self.tier_num = num
+        self.amount_required = amount_requried
+        self.unlocks = unlocks
+
+class Collection():
+    def __init__(self, item_name: str, max_tiers: int, tiers: list[Tier]):
+        self.item_name = item_name
+        self.max_tiers = max_tiers
+        self.tiers = tiers
+
+
+
+
+'''
     def get_names(self) -> list[str]:
         return self._dataset["name"].to_list()
     
@@ -54,6 +75,5 @@ class Collections():
     
     def get_data_by_name(self, coll_name: str):
         return self._dataset[self._dataset["name"] == coll_name].to_dict()
+'''
     
-
-
