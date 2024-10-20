@@ -59,24 +59,34 @@ class Elections:
     
 
     def _build_mayor(self):
+        ''' make perkes'''
         mayor = self._data["mayor"]
         perks = [Perk(i["name"], i["description"]) for i in  mayor["perks"]]
+
+        '''make current minister'''
         minister = mayor["minister"]
         min_perk = minister["perk"]
         minister = Minister(minister["key"], minister["name"], Perk(min_perk["name"], min_perk["description"]
                                                                     , min_perk["minister"])) # type swithc fuck em
        
-       
+        '''make current election'''
         election = mayor["election"]
         candidates = []
+
+        ''' get candidates for election'''
         for i in election["candidates"]:
             perks = [Perk(j["name"], j["description"], j["minister"]) for j in i["perks"]]
             candidates.append(Candidate(i["key"], i["name"], perks, i["votes"]))
+
+
+        '''create election mayor won, and current mayor'''
         election = Election(election["year"], candidates)
         self._mayor = Mayor(mayor["key"], mayor["name"], perks, minister, election)
 
 
     def _build_current(self):
+
+        '''create current election'''
         current = self._data["current"]
         candidates = []
         for i in current["candidates"]:
@@ -85,7 +95,7 @@ class Elections:
         current = Election(current["year"], candidates)
         self._current = current
 
-
+    '''API call'''
     def get_data(self):
         try:
             response = requests.get(URL)
