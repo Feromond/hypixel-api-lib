@@ -71,14 +71,22 @@ class Skills:
         try:
             response = requests.get(self.api_endpoint)
             response.raise_for_status()
-            data = response.json()  
+            data = response.json()
             
             if "skills" in data and data["skills"]:
-                self.skills = {key: Skill(value['name'], value['description'], value['maxLevel'], value['levels']) for key, value in data["skills"].items()}
+                self.skills = {
+                    key: Skill(
+                        value['name'],
+                        value.get('description', ''),
+                        value['maxLevel'],
+                        value['levels']
+                    )
+                    for key, value in data["skills"].items()
+                }
             else:
                 raise ValueError("No skills data available in the response")
         except requests.exceptions.RequestException as e:
-            print(f"An error occurred: {e}")
+            raise ConnectionError(f"An error occurred: {e}")
 
     def get_skill(self, name):
         """
