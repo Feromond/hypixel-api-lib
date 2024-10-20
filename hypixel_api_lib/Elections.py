@@ -1,8 +1,5 @@
-
-import pandas as pd
 import requests
-import json
-import numpy as np
+
 
 URL = r"https://api.hypixel.net/v2/resources/skyblock/election"
 
@@ -26,6 +23,9 @@ class Candidate:
         self._name = name
         self._perks = perks
         self._votes = votes
+
+    def __str__(self):
+        return "%s: %d" % (self._name, self._votes)
 
 
 class Election:
