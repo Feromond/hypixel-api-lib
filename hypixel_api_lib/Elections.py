@@ -9,16 +9,27 @@ URL = r"https://api.hypixel.net/v2/resources/skyblock/election"
 
 
 
+
+
 class Perk:
     def __init__(self, name: str, description: str) -> None:
         self.name = name
         self.description = description
 
+class Minister:
+    def __init__(self, key: str, name: str, perk: Perk):
+        self._key = key
+        self._name = name
+        self._perk = perk
+        self.minister = True    # putting this here
+
+
 class Mayor:
-    def __init__(self, key: str, name: str, perks: list[Perk]) -> None:
+    def __init__(self, key: str, name: str, perks: list[Perk], minister: Minister) -> None:
         self._key = key
         self._name = name
         self._perks = perks
+        self._minister = minister
 
         
 
@@ -31,7 +42,13 @@ class Elections:
         self._data = self.get_data()
         mayor = self._data["mayor"]
         perks = [Perk(i["name"], i["description"]) for i in  mayor["perks"]]
-        self._mayor = Mayor(mayor["key"], mayor["name"], perks)
+        minister = mayor["minister"]
+        min_perk = minister["perk"]
+        minister = Minister(minister["key"], minister["name"], Perk(min_perk["name"], min_perk["description"])) # type swithc fuck em
+        self._mayor = Mayor(mayor["key"], mayor["name"], perks, minister)
+
+
+
         
 
 
@@ -52,10 +69,9 @@ class Elections:
 
 def main():
     e = Elections()
-    mayor = e._mayor
-    for i in mayor._perks:
-        print(i.description)
-
+    minister = e._mayor._minister
+    print(minister._key)
+    print(minister._perk.name)
 
 if __name__ == "__main__":
     main()
