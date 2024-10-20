@@ -1,7 +1,4 @@
-import pandas as pd
 import requests
-import json
-import numpy as np
 
 URL = r"https://api.hypixel.net/v2/resources/skyblock/collections"
 
