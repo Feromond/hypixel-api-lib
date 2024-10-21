@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 import requests
 
@@ -99,9 +99,37 @@ class BingoEvent:
         self.goals = [BingoGoal(goal) for goal in event_data.get('goals', [])]
 
     def _convert_timestamp(self, timestamp):
-        """Convert a timestamp in milliseconds to a datetime object."""
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000)
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+    
+    def get_start_time_in_timezone(self, tz):
+        """
+        Get the start time converted to the specified time zone.
+
+        Args:
+            tz (timezone): A timezone object.
+
+        Returns:
+            datetime: The start time in the specified time zone.
+        """
+        if self.start:
+            return self.start.astimezone(tz)
+        return None
+
+    def get_end_time_in_timezone(self, tz):
+        """
+        Get the end time converted to the specified time zone.
+
+        Args:
+            tz (timezone): A timezone object.
+
+        Returns:
+            datetime: The end time in the specified time zone.
+        """
+        if self.end:
+            return self.end.astimezone(tz)
         return None
 
     def get_goal_by_id(self, goal_id):
@@ -129,8 +157,8 @@ class BingoEvent:
         return next((goal for goal in self.goals if goal.name.lower() == goal_name.lower()), None)
 
     def __str__(self):
-        start_str = self.start.strftime("%Y-%m-%d %H:%M:%S") if self.start else "N/A"
-        end_str = self.end.strftime("%Y-%m-%d %H:%M:%S") if self.end else "N/A"
+        start_str = self.start.strftime("%Y-%m-%d %H:%M:%S %Z") if self.start else "N/A"
+        end_str = self.end.strftime("%Y-%m-%d %H:%M:%S %Z") if self.end else "N/A"
         return f"Bingo Event '{self.name}' (ID: {self.id}) from {start_str} to {end_str}"
 
 class BingoEvents:
