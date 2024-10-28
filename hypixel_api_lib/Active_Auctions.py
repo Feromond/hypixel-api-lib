@@ -111,8 +111,36 @@ class SkyBlockAuction:
             return self.end.astimezone(tz)
         return None
 
+    @property
+    def current_price(self):
+        """
+        Get the current price of the auction.
+
+        For BIN auctions (with no bids), this is the starting_bid.
+        For regular auctions, this is the highest_bid_amount.
+
+        Returns:
+            int: The current price of the auction.
+        """
+        if not self.bids:
+            return self.starting_bid
+        else:
+            return max(self.starting_bid, self.highest_bid_amount)
+
+    @property
+    def is_bin(self):
+        """
+        Estimate whether the auction is a BIN auction.
+
+        Returns:
+            bool: True if the auction is likely a BIN auction, False otherwise.
+        """
+        # Since I can't know from the API, I'm assume auctions with no bids are BIN
+        return not self.bids
+
     def __str__(self):
-        return f"Auction '{self.item_name}' by {self.auctioneer} for {max(self.highest_bid_amount, self.starting_bid)}"
+        auction_type = "BIN" if self.is_bin else "Auction"
+        return f"{auction_type} '{self.item_name}' by {self.auctioneer}, Price: {self.current_price}"
 
 class AuctionsPage:
     """
@@ -211,14 +239,53 @@ class Auctions:
         """
         all_auctions = []
         first_page = self.get_page(0)
-        all_auctions.extend(first_page.auctions)
-
         total_pages = first_page.totalPages
-        for page_number in range(1, total_pages):
+
+        for page_number in range(total_pages):
             page = self.get_page(page_number)
             all_auctions.extend(page.auctions)
 
         return all_auctions
+
+    def search_auctions(self, item_name=None, min_price=None, max_price=None, sort_by_price=False, descending=False):
+        """
+        Search for auctions matching the specified criteria.
+
+        Args:
+            item_name (str, optional): The name of the item to search for.
+            min_price (int, optional): The minimum price.
+            max_price (int, optional): The maximum price.
+            sort_by_price (bool, optional): Whether to sort the results by price.
+            descending (bool, optional): Whether to sort in descending order.
+
+        Returns:
+            list of SkyBlockAuction: A list of auctions matching the criteria.
+        """
+        matching_auctions = []
+        first_page = self.get_page(0)
+        total_pages = first_page.totalPages
+
+        def matches(auction):
+            if item_name and auction.item_name.lower() != item_name.lower():
+                return False
+            price = auction.current_price
+            if min_price is not None and price < min_price:
+                return False
+            if max_price is not None and price > max_price:
+                return False
+            return True
+
+        # Iterate through all pages
+        for page_number in range(total_pages):
+            page = self.get_page(page_number)
+            for auction in page.auctions:
+                if matches(auction):
+                    matching_auctions.append(auction)
+
+        if sort_by_price:
+            matching_auctions.sort(key=lambda x: x.current_price, reverse=descending)
+
+        return matching_auctions
 
     def get_auction_by_id(self, auction_id):
         """
