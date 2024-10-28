@@ -22,3 +22,15 @@ matching_auctions = auctions_manager.search_auctions(
 # Print the matching auctions
 for auction in matching_auctions:
     print(auction)
+
+
+# If you prefer to preload all data for faster local speed on a given snapshot:
+auctions_manager_preloaded = Auctions(preload_all=True)
+
+# Now searches will use the preloaded data
+matching_auctions = auctions_manager_preloaded.search_auctions(
+    item_name="Aspect of the Dragons",
+    min_price=1_000_000,
+    sort_by_price=True,
+    descending=True
+)

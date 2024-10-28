@@ -202,14 +202,20 @@ class Auctions:
 
     Attributes:
         api_endpoint (str): The API endpoint URL.
+        all_auctions (list of SkyBlockAuction): Cached list of all auctions.
+        cache_pages (dict): Cached pages of auctions.
     """
 
-    def __init__(self, api_endpoint=ACTIVE_AUCTIONS_API_URL):
+    def __init__(self, api_endpoint=ACTIVE_AUCTIONS_API_URL, preload_all=False):
         self._api_endpoint = api_endpoint
+        self.all_auctions = []
+        self.cache_pages = {}
+        if preload_all:
+            self.all_auctions = self.get_all_auctions()
 
     def get_page(self, page_number=0):
         """
-        Fetch a specific page of auctions.
+        Fetch a specific page of auctions, using cache if available.
 
         Args:
             page_number (int): The page number to fetch.
@@ -217,6 +223,9 @@ class Auctions:
         Returns:
             AuctionsPage: The AuctionsPage object for the requested page.
         """
+        if page_number in self.cache_pages:
+            return self.cache_pages[page_number]
+
         params = {'page': page_number}
         try:
             response = requests.get(self._api_endpoint, params=params)
@@ -224,7 +233,9 @@ class Auctions:
             data = response.json()
 
             if data.get('success'):
-                return AuctionsPage(data)
+                page = AuctionsPage(data)
+                self.cache_pages[page_number] = page
+                return page
             else:
                 raise ValueError("API response was not successful")
         except requests.exceptions.RequestException as e:
@@ -237,17 +248,22 @@ class Auctions:
         Returns:
             list of SkyBlockAuction: A list of all auctions.
         """
+        if self.all_auctions:
+            return self.all_auctions  # Return cached data
+
         all_auctions = []
         first_page = self.get_page(0)
         total_pages = first_page.totalPages
+        all_auctions.extend(first_page.auctions)
 
-        for page_number in range(total_pages):
+        for page_number in range(1, total_pages):
             page = self.get_page(page_number)
             all_auctions.extend(page.auctions)
 
+        self.all_auctions = all_auctions  # Cache the results
         return all_auctions
 
-    def search_auctions(self, item_name=None, min_price=None, max_price=None, sort_by_price=False, descending=False):
+    def search_auctions(self, item_name=None, min_price=None, max_price=None, sort_by_price=False, descending=False, max_pages=None):
         """
         Search for auctions matching the specified criteria.
 
@@ -257,16 +273,32 @@ class Auctions:
             max_price (int, optional): The maximum price.
             sort_by_price (bool, optional): Whether to sort the results by price.
             descending (bool, optional): Whether to sort in descending order.
+            max_pages (int, optional): Maximum number of pages to search.
 
         Returns:
             list of SkyBlockAuction: A list of auctions matching the criteria.
         """
         matching_auctions = []
-        first_page = self.get_page(0)
-        total_pages = first_page.totalPages
 
+        # Use cached data if available
+        if self.all_auctions:
+            auctions_to_search = self.all_auctions
+        else:
+            first_page = self.get_page(0)
+            total_pages = first_page.totalPages
+            if max_pages:
+                total_pages = min(total_pages, max_pages)
+
+            auctions_to_search = []
+            auctions_to_search.extend(first_page.auctions)
+
+            for page_number in range(1, total_pages):
+                page = self.get_page(page_number)
+                auctions_to_search.extend(page.auctions)
+
+        # Function to check if an auction matches the criteria
         def matches(auction):
-            if item_name and auction.item_name.lower() != item_name.lower():
+            if item_name and item_name.lower() not in auction.item_name.lower():
                 return False
             price = auction.current_price
             if min_price is not None and price < min_price:
@@ -275,12 +307,9 @@ class Auctions:
                 return False
             return True
 
-        # Iterate through all pages
-        for page_number in range(total_pages):
-            page = self.get_page(page_number)
-            for auction in page.auctions:
-                if matches(auction):
-                    matching_auctions.append(auction)
+        for auction in auctions_to_search:
+            if matches(auction):
+                matching_auctions.append(auction)
 
         if sort_by_price:
             matching_auctions.sort(key=lambda x: x.current_price, reverse=descending)
