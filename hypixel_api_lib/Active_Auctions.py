@@ -337,4 +337,4 @@ class Auctions:
         return None
 
     def __str__(self):
-        return f"Auctions Manager using endpoint {self.api_endpoint}"
+        return f"Auctions Manager using endpoint {self._api_endpoint}"
