@@ -36,6 +36,8 @@ class FireSaleItem:
             bool: True if the sale is active, False otherwise.
         """
         now = datetime.now(timezone.utc)
+        if self.start is None or self.end is None:
+            return False
         return self.start <= now <= self.end
 
     def time_until_start(self):
@@ -43,20 +45,32 @@ class FireSaleItem:
         Get the time remaining until the sale starts.
 
         Returns:
-            timedelta: Time remaining until the sale starts.
+            timedelta or None: Time remaining until the sale starts, or None if the sale has already started.
         """
         now = datetime.now(timezone.utc)
-        return self.start - now if now < self.start else None
+        if self.start is None:
+            return None
+        if now < self.start:
+            return self.start - now
+        else:
+            return None
 
     def time_until_end(self):
         """
         Get the time remaining until the sale ends.
 
         Returns:
-            timedelta: Time remaining until the sale ends.
+            timedelta or None: Time remaining until the sale ends, or None if the sale hasn't started or has ended.
         """
         now = datetime.now(timezone.utc)
-        return self.end - now if now < self.end else None
+        if self.start is None or self.end is None:
+            return None
+        if now < self.start:
+            return None
+        elif now < self.end:
+            return self.end - now
+        else:
+            return None
 
     def __str__(self):
         start_str = self.start.strftime("%Y-%m-%d %H:%M:%S %Z") if self.start else "N/A"
