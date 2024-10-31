@@ -89,7 +89,7 @@ This directory contains all the example code for this library. Each component ha
 ├── LICENSE            # None set yet
 ├── README.md          # This file
 ├── .gitignore         # Files to ignore during our git process
-├── .env               # File to store environment vairables such as API keys for examples.
+├── .env               # (Will be gitignored) File to store environment vairables such as API keys for examples.
 ├── Makefile           # Commands for building, initializing, and other tasks
 ├── requirements.txt   # Lists the Python package dependencies
 ├── setup.py           # Setup script for packaging and distribution
