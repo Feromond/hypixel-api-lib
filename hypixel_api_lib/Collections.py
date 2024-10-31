@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 
 URL = r"https://api.hypixel.net/v2/resources/skyblock/collections"
 
