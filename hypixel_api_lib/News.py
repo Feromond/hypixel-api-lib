@@ -81,7 +81,7 @@ class SkyBlockNews:
             elif response_status == 429:
                 raise ConnectionError("Request limit reached: Throttling in effect.")
             else:
-                raise ConnectionError(f"HTTP error occurred: {e}")
+                raise ConnectionError(f"An error occurred while fetching news: {e}")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching news: {e}")
 
