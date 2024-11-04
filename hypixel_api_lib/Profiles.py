@@ -11,12 +11,13 @@ class CommunityUpgradeState:
     Attributes:
         upgrade (str): The name of the upgrade.
         tier (int): The tier level of the upgrade.
-        started_ms (int): The timestamp when the upgrade started.
+        started_ms (datetime): The datetime when the upgrade started.
         started_by (str): The UUID of the player who started the upgrade.
-        claimed_ms (int): The timestamp when the upgrade was claimed.
+        claimed_ms (datetime): The datetime when the upgrade was claimed.
         claimed_by (str): The UUID of the player who claimed the upgrade.
         fasttracked (bool): Whether the upgrade was fast-tracked.
     """
+
     def __init__(self, data):
         self.upgrade = data.get('upgrade')
         self.tier = data.get('tier')
@@ -26,7 +27,8 @@ class CommunityUpgradeState:
         self.claimed_by = data.get('claimed_by')
         self.fasttracked = data.get('fasttracked', False)
 
-    def _convert_timestamp(self, timestamp):
+    @staticmethod
+    def _convert_timestamp(timestamp):
         """Convert a timestamp in milliseconds to a datetime object in UTC."""
         if timestamp is not None:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
@@ -34,6 +36,7 @@ class CommunityUpgradeState:
 
     def __str__(self):
         return f"Upgrade: {self.upgrade}, Tier: {self.tier}, Fasttracked: {self.fasttracked}"
+
 
 class CommunityUpgrades:
     """
@@ -43,6 +46,7 @@ class CommunityUpgrades:
         currently_upgrading (CommunityUpgradeState or None): The current upgrade in progress.
         upgrade_states (list of CommunityUpgradeState): A list of completed upgrades.
     """
+
     def __init__(self, data):
         currently_upgrading_data = data.get('currently_upgrading')
         self.currently_upgrading = (
@@ -56,17 +60,27 @@ class CommunityUpgrades:
         upgrading = str(self.currently_upgrading) if self.currently_upgrading else "None"
         return f"Community Upgrades (Currently Upgrading: {upgrading})"
 
+
 class BankTransaction:
     """
     Represents a bank transaction.
+
+    Attributes:
+        timestamp (datetime): The timestamp of the transaction.
+        action (str): The action of the transaction ('DEPOSIT' or 'WITHDRAW').
+        initiator_name (str): The name of the player who initiated the transaction.
+        amount (float): The amount of the transaction.
     """
+
     def __init__(self, data):
         self.timestamp = self._convert_timestamp(data.get('timestamp'))
         self.action = data.get('action')
         self.initiator_name = data.get('initiator_name')
         self.amount = data.get('amount')
 
-    def _convert_timestamp(self, timestamp):
+    @staticmethod
+    def _convert_timestamp(timestamp):
+        """Convert a timestamp in milliseconds to a datetime object in UTC."""
         if timestamp is not None:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
@@ -75,10 +89,16 @@ class BankTransaction:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
         return f"{self.action} of {self.amount} by {self.initiator_name} at {timestamp_str}"
 
+
 class Banking:
     """
     Represents the banking information of a SkyBlock profile.
+
+    Attributes:
+        balance (float): The current balance of the bank.
+        transactions (list of BankTransaction): A list of bank transactions.
     """
+
     def __init__(self, data):
         self.balance = data.get('balance', 0.0)
         self.transactions = [BankTransaction(txn) for txn in data.get('transactions', [])]
@@ -86,14 +106,21 @@ class Banking:
     def __str__(self):
         return f"Banking Balance: {self.balance}, Transactions: {len(self.transactions)}"
 
+
 class DeletionNotice:
     """
     Represents a deletion notice for a member profile.
+
+    Attributes:
+        timestamp (datetime): The timestamp when the deletion notice was issued.
     """
+
     def __init__(self, data):
         self.timestamp = self._convert_timestamp(data.get('timestamp'))
 
-    def _convert_timestamp(self, timestamp):
+    @staticmethod
+    def _convert_timestamp(timestamp):
+        """Convert a timestamp in milliseconds to a datetime object in UTC."""
         if timestamp is not None:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
@@ -109,8 +136,37 @@ class SkyBlockProfileMember:
 
     Attributes:
         uuid (str): The UUID of the member.
-        All member data fields.
+        rift (dict): Rift-related data.
+        player_data (dict): General player data.
+        glacite_player_data (dict): Glacite-specific player data.
+        events (dict): Event-related data.
+        garden_player_data (dict): Garden player data.
+        pets_data (dict): Data about pets.
+        accessory_bag_storage (dict): Accessory bag storage data.
+        leveling (dict): Leveling data.
+        item_data (dict): Item data.
+        jacobs_contest (dict): Jacob's contest data.
+        currencies (dict): Currency data.
+        dungeons (dict): Dungeon-related data.
+        profile (dict): Profile data.
+        player_id (str): The player ID.
+        nether_island_player_data (dict): Nether island data.
+        experimentation (dict): Experimentation data.
+        mining_core (dict): Mining core data.
+        bestiary (dict): Bestiary data.
+        quests (dict): Quest data.
+        player_stats (dict): Player statistics.
+        winter_player_data (dict): Winter event data.
+        forge (dict): Forge data.
+        fairy_soul (dict): Fairy soul data.
+        slayer (dict): Slayer data.
+        trophy_fish (dict): Trophy fish data.
+        objectives (dict): Objectives data.
+        inventory (dict): Inventory data.
+        shared_inventory (dict): Shared inventory data.
+        collection (dict): Collection data.
     """
+
     def __init__(self, uuid, data):
         self.uuid = uuid
         self.rift = data.get('rift', {})
@@ -126,6 +182,8 @@ class SkyBlockProfileMember:
         self.currencies = data.get('currencies', {})
         self.dungeons = data.get('dungeons', {})
         self.profile = data.get('profile', {})
+        self.deleted_member = self.is_member_deleted()
+        self.deleted_timestamp = DeletionNotice(self.profile.get("deletion_notice")) if self.deleted_member else None
         self.player_id = data.get('player_id')
         self.nether_island_player_data = data.get('nether_island_player_data', {})
         self.experimentation = data.get('experimentation', {})
@@ -152,15 +210,21 @@ class SkyBlockProfileMember:
     def __str__(self):
         return f"SkyBlockProfileMember UUID: {self.uuid}"
 
+
 class SkyBlockProfile:
     """
-    Represents a SkyBlock profile. (Currently just with the profile endpoint and not profiles...)
+    Represents a SkyBlock profile.
 
     Attributes:
         profile_id (str): The unique identifier of the profile.
-        community_upgrades (CommunityUpgrades): The community upgrades associated with the profile.
-        members (dict): A dictionary of members in the profile.
+        members (dict): A dictionary mapping member UUIDs to SkyBlockProfileMember objects.
+        community_upgrades (CommunityUpgrades or None): The community upgrades associated with the profile.
+        banking (Banking or None): The banking information of the profile.
+        cute_name (str or None): The cute name of the profile (only provided by the profiles endpoint).
+        selected (bool or None): Whether this is the player's selected profile (only provided by the profiles endpoint).
+        game_mode (str): The game mode of the profile ('ironman', 'island', 'bingo', or 'Normal').
     """
+
     def __init__(self, data):
         self.profile_id = data.get('profile_id')
         self.members = {}
@@ -202,16 +266,20 @@ class SkyBlockProfile:
         return list(self.members.keys())
 
     def __str__(self):
-        return f"SkyBlockProfile ID: {self.profile_id}, Members: {self.list_member_uuids()}"
+        cute_name_str = f", Cute Name: {self.cute_name}" if self.cute_name else ""
+        selected_str = ", Selected" if self.selected else ""
+        game_mode_str = f", Game Mode: {self.game_mode}" if self.game_mode else ""
+        return f"SkyBlockProfile ID: {self.profile_id}{cute_name_str}{selected_str}{game_mode_str}, Members: {self.list_member_uuids()}"
+
 
 class SkyBlockProfiles:
     """
-    Handles fetching and managing SkyBlock profile data from the API.
+    Handles fetching and managing SkyBlock profile data from the Hypixel API.
 
     Attributes:
-        api_key (str): The API key required for the request.
-        api_endpoint (str): The endpoint URL to fetch the profile data.
+        api_key (str): The API key required for the requests.
     """
+
     def __init__(self, api_key):
         self.api_key = api_key
         self._profile_endpoint = PROFILE_API_URL
@@ -219,13 +287,18 @@ class SkyBlockProfiles:
 
     def get_profile(self, profile_id):
         """
-        Fetches a single profile by profile ID.
+        Fetches a single profile by profile ID using the profile endpoint.
 
         Args:
             profile_id (str): The profile ID to fetch.
 
         Returns:
             SkyBlockProfile: The SkyBlockProfile object containing profile data.
+
+        Raises:
+            ValueError: If no profile data is available in the response.
+            PermissionError: If access is forbidden (e.g., invalid API key).
+            ConnectionError: If there's an issue with the connection or request.
         """
         try:
             params = {'key': self.api_key, 'profile': profile_id}
@@ -245,19 +318,24 @@ class SkyBlockProfiles:
             elif response_status == 429:
                 raise ConnectionError("Request limit reached: Throttling in effect.")
             else:
-                raise ConnectionError(f"An error occurred while fetching the profile: {e}")
+                raise ConnectionError(f"HTTP error occurred: {e}")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching the profile: {e}")
 
     def get_profiles_by_player_uuid(self, player_uuid):
         """
-        Fetches all profiles associated with a player UUID.
+        Fetches all profiles associated with a player UUID using the profiles endpoint.
 
         Args:
             player_uuid (str): The UUID of the player.
 
         Returns:
             list of SkyBlockProfile: A list of SkyBlockProfile objects.
+
+        Raises:
+            ValueError: If no profiles data is available in the response.
+            PermissionError: If access is forbidden (e.g., invalid API key).
+            ConnectionError: If there's an issue with the connection or request.
         """
         try:
             params = {'key': self.api_key, 'uuid': player_uuid}
@@ -278,7 +356,7 @@ class SkyBlockProfiles:
             elif response_status == 429:
                 raise ConnectionError("Request limit reached: Throttling in effect.")
             else:
-                raise ConnectionError(f"An error occurred while fetching the profiles: {e}")
+                raise ConnectionError(f"HTTP error occurred: {e}")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching the profiles: {e}")
 
@@ -291,9 +369,12 @@ class SkyBlockProfiles:
 
         Returns:
             SkyBlockProfile or None: The selected SkyBlockProfile object, or None if not found.
+
+        Raises:
+            Exception: If there's an issue fetching profiles.
         """
         profiles = self.get_profiles_by_player_uuid(player_uuid)
         for profile in profiles:
-            if hasattr(profile, 'selected') and profile.selected:
+            if profile.selected:
                 return profile
         return None
