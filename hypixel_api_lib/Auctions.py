@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import requests
 
 ACTIVE_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions"
+RECENTLY_ENDED_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions_ended"
 PLAYER_AUCTION_API_URL = "https://api.hypixel.net/skyblock/auction"
 MOJANG_API_URL = "https://api.mojang.com/users/profiles/minecraft/"
 
@@ -340,6 +341,134 @@ class ActiveAuctions:
 
     def __str__(self):
         return f"Auctions Manager using endpoint {self._api_endpoint}"
+
+class RecentlyEndedAuction:
+    """
+    Represents a recently ended SkyBlock auction.
+    The skyblock auction representation of an auction 
+    is not sufficent for these recently ended versions.
+    That is why I create this extra class to handle it specifically.
+
+    Attributes:
+        auction_id (str): The unique identifier of the auction.
+        seller (str): The UUID of the seller.
+        seller_profile (str): The profile ID of the seller.
+        buyer (str): The UUID of the buyer.
+        buyer_profile (str): The profile ID of the buyer.
+        timestamp (datetime): The timestamp when the auction ended.
+        price (int): The final price of the auction.
+        bin (bool): Whether the auction was a Buy It Now (BIN) auction.
+        item_bytes (str): Serialized item data.
+    """
+
+    def __init__(self, auction_data):
+        self.auction_id = auction_data.get('auction_id')
+        self.seller = auction_data.get('seller')
+        self.seller_profile = auction_data.get('seller_profile')
+        self.buyer = auction_data.get('buyer')
+        self.buyer_profile = auction_data.get('buyer_profile')
+        self.timestamp = self._convert_timestamp(auction_data.get('timestamp'))
+        self.price = auction_data.get('price')
+        self.bin = auction_data.get('bin', False)
+        self.item_bytes = auction_data.get('item_bytes')
+
+    def _convert_timestamp(self, timestamp):
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+
+    def __str__(self):
+        auction_type = "BIN" if self.bin else "Auction"
+        timestamp_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z") if self.timestamp else "N/A"
+        return f"{auction_type} '{self.auction_id}' sold by {self.seller} to {self.buyer} at {timestamp_str} for {self.price}"
+
+class RecentlyEndedAuctions:
+    """
+    Manages fetching recently ended auctions from the Hypixel SkyBlock Auctions API.
+
+    Attributes:
+        last_updated (datetime): The last updated timestamp.
+        auctions (list of RecentlyEndedAuction): The list of recently ended auctions.
+    """
+
+    def __init__(self, api_endpoint=RECENTLY_ENDED_AUCTIONS_API_URL):
+        self._api_endpoint = api_endpoint
+        self.last_updated = None
+        self.auctions = []
+        self._load_ended_auctions()
+
+    def _load_ended_auctions(self):
+        """
+        Fetch recently ended auctions from the API.
+        """
+        try:
+            response = requests.get(self._api_endpoint)
+            response.raise_for_status()
+            data = response.json()
+            if data.get('success'):
+                self.last_updated = self._convert_timestamp(data.get('lastUpdated'))
+                auctions_data = data.get('auctions', [])
+                self.auctions = [RecentlyEndedAuction(auction_data) for auction_data in auctions_data]
+            else:
+                raise ValueError("API response was not successful")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching recently ended auctions: {e}")
+
+    def _convert_timestamp(self, timestamp):
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+
+    def get_auction_by_id(self, auction_id):
+        """
+        Retrieve an auction by its ID.
+
+        Args:
+            auction_id (str): The ID of the auction.
+
+        Returns:
+            RecentlyEndedAuction or None: The auction object, or None if not found.
+        """
+        return next((auction for auction in self.auctions if auction.auction_id == auction_id), None)
+
+    def search_auctions(self, seller=None, buyer=None, min_price=None, max_price=None, bin_only=None):
+        """
+        Search for auctions matching the specified criteria.
+
+        Args:
+            seller (str, optional): The UUID of the seller.
+            buyer (str, optional): The UUID of the buyer.
+            min_price (int, optional): The minimum price.
+            max_price (int, optional): The maximum price.
+            bin_only (bool, optional): If True, only include BIN auctions; if False, exclude BIN auctions; if None, include all.
+
+        Returns:
+            list of RecentlyEndedAuction: A list of auctions matching the criteria.
+        """
+        matching_auctions = []
+
+        for auction in self.auctions:
+            if seller and auction.seller != seller:
+                continue
+            if buyer and auction.buyer != buyer:
+                continue
+            if min_price is not None and auction.price < min_price:
+                continue
+            if max_price is not None and auction.price > max_price:
+                continue
+            if bin_only is True and not auction.bin:
+                continue
+            if bin_only is False and auction.bin:
+                continue
+            matching_auctions.append(auction)
+
+        return matching_auctions
+
+    def __str__(self):
+        last_updated_str = self.last_updated.strftime("%Y-%m-%d %H:%M:%S %Z") if self.last_updated else "N/A"
+        return f"RecentlyEndedAuctions with {len(self.auctions)} auctions as of {last_updated_str}"
 
 class PlayerAuctions:
     """
