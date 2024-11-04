@@ -3,7 +3,7 @@ from unittest.mock import patch
 from datetime import datetime, timezone, timedelta
 import requests
 
-from hypixel_api_lib.ActiveAuctions import Bid, SkyBlockAuction, AuctionsPage, ActiveAuctions
+from hypixel_api_lib.Auctions import Bid, SkyBlockAuction, AuctionsPage, ActiveAuctions
 
 class TestAuctionsComponent(unittest.TestCase):
     def setUp(self):
