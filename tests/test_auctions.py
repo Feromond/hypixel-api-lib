@@ -8,7 +8,9 @@ from hypixel_api_lib.Auctions import (
     SkyBlockAuction,
     AuctionsPage,
     ActiveAuctions,
-    PlayerAuctions
+    PlayerAuctions,
+    RecentlyEndedAuctions,
+    RecentlyEndedAuction
 )
 
 class TestAuctionsComponent(unittest.TestCase):
@@ -75,6 +77,35 @@ class TestAuctionsComponent(unittest.TestCase):
                     "claimed_bidders": [],
                     "highest_bid_amount": 500000000,
                     "bids": []
+                }
+            ]
+        }
+        # Sample data for recently ended auctions
+        self.sample_recently_ended_response = {
+            "success": True,
+            "lastUpdated": 1728619119062,
+            "auctions": [
+                {
+                    "auction_id": "ended_auction1",
+                    "seller": "seller1_uuid",
+                    "seller_profile": "seller1_profile",
+                    "buyer": "buyer1_uuid",
+                    "buyer_profile": "buyer1_profile",
+                    "timestamp": 1728619000000,
+                    "price": 2000000,
+                    "bin": True,
+                    "item_bytes": "..."
+                },
+                {
+                    "auction_id": "ended_auction2",
+                    "seller": "seller2_uuid",
+                    "seller_profile": "seller2_profile",
+                    "buyer": "buyer2_uuid",
+                    "buyer_profile": "buyer2_profile",
+                    "timestamp": 1728619050000,
+                    "price": 1500000,
+                    "bin": False,
+                    "item_bytes": "..."
                 }
             ]
         }
@@ -396,6 +427,186 @@ class TestAuctionsComponent(unittest.TestCase):
         self.assertEqual(page.totalAuctions, 0)
         self.assertIsNone(page.lastUpdated)
         self.assertEqual(page.auctions, [])
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_initialization(self, mock_get):
+        """
+        Test the initialization of the RecentlyEndedAuctions class and loading of auctions.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_recently_ended_response
+
+        recently_ended_auctions = RecentlyEndedAuctions()
+        self.assertIsNotNone(recently_ended_auctions)
+        self.assertEqual(len(recently_ended_auctions.auctions), 2)
+        self.assertIsInstance(recently_ended_auctions.auctions[0], RecentlyEndedAuction)
+        expected_last_updated = datetime.fromtimestamp(1728619119062 / 1000, tz=timezone.utc)
+        self.assertEqual(recently_ended_auctions.last_updated, expected_last_updated)
+
+    def test_recently_ended_auction_initialization(self):
+        """
+        Test the initialization of the RecentlyEndedAuction class with sample data.
+        """
+        auction_data = self.sample_recently_ended_response['auctions'][0]
+        auction = RecentlyEndedAuction(auction_data)
+
+        self.assertEqual(auction.auction_id, "ended_auction1")
+        self.assertEqual(auction.seller, "seller1_uuid")
+        self.assertEqual(auction.seller_profile, "seller1_profile")
+        self.assertEqual(auction.buyer, "buyer1_uuid")
+        self.assertEqual(auction.buyer_profile, "buyer1_profile")
+        expected_timestamp = datetime.fromtimestamp(1728619000000 / 1000, tz=timezone.utc)
+        self.assertEqual(auction.timestamp, expected_timestamp)
+        self.assertEqual(auction.price, 2000000)
+        self.assertTrue(auction.bin)
+        self.assertEqual(auction.item_bytes, "...")
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_get_auction_by_id(self, mock_get):
+        """
+        Test the get_auction_by_id method of RecentlyEndedAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_recently_ended_response
+
+        recently_ended_auctions = RecentlyEndedAuctions()
+        auction = recently_ended_auctions.get_auction_by_id("ended_auction1")
+
+        self.assertIsNotNone(auction)
+        self.assertEqual(auction.auction_id, "ended_auction1")
+
+        # Test non-existent auction
+        auction_none = recently_ended_auctions.get_auction_by_id("non_existent_auction")
+        self.assertIsNone(auction_none)
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_search_auctions(self, mock_get):
+        """
+        Test the search_auctions method of RecentlyEndedAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_recently_ended_response
+
+        recently_ended_auctions = RecentlyEndedAuctions()
+        # Search by seller
+        auctions_by_seller = recently_ended_auctions.search_auctions(seller="seller1_uuid")
+        self.assertEqual(len(auctions_by_seller), 1)
+        self.assertEqual(auctions_by_seller[0].seller, "seller1_uuid")
+
+        # Search by buyer
+        auctions_by_buyer = recently_ended_auctions.search_auctions(buyer="buyer2_uuid")
+        self.assertEqual(len(auctions_by_buyer), 1)
+        self.assertEqual(auctions_by_buyer[0].buyer, "buyer2_uuid")
+
+        # Search by price range
+        auctions_by_price = recently_ended_auctions.search_auctions(min_price=1000000, max_price=1800000)
+        self.assertEqual(len(auctions_by_price), 1)
+        self.assertEqual(auctions_by_price[0].price, 1500000)
+
+        # Search BIN auctions only
+        bin_auctions = recently_ended_auctions.search_auctions(bin_only=True)
+        self.assertEqual(len(bin_auctions), 1)
+        self.assertTrue(bin_auctions[0].bin)
+
+        # Search non-BIN auctions only
+        non_bin_auctions = recently_ended_auctions.search_auctions(bin_only=False)
+        self.assertEqual(len(non_bin_auctions), 1)
+        self.assertFalse(non_bin_auctions[0].bin)
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_error_handling(self, mock_get):
+        """
+        Test handling of network errors in RecentlyEndedAuctions class.
+        """
+        # Simulate a network error
+        mock_get.side_effect = requests.exceptions.RequestException("Network error")
+
+        with self.assertRaises(ConnectionError) as context:
+            RecentlyEndedAuctions()
+        self.assertIn("An error occurred while fetching recently ended auctions: Network error", str(context.exception))
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_unsuccessful_response(self, mock_get):
+        """
+        Test handling of unsuccessful API response in RecentlyEndedAuctions class.
+        """
+        # Mock an unsuccessful API response
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {
+            "success": False,
+            "cause": "Invalid request"
+        }
+
+        with self.assertRaises(ValueError) as context:
+            RecentlyEndedAuctions()
+        self.assertIn("API response was not successful", str(context.exception))
+
+    def test_recently_ended_auction_str(self):
+        """
+        Test the __str__ method of RecentlyEndedAuction class.
+        """
+        auction_data = self.sample_recently_ended_response['auctions'][0]
+        auction = RecentlyEndedAuction(auction_data)
+        timestamp_str = auction.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z")
+        expected_str = f"BIN 'ended_auction1' sold by seller1_uuid to buyer1_uuid at {timestamp_str} for 2000000"
+        self.assertEqual(str(auction), expected_str)
+
+        # Test non-BIN auction
+        auction_data_non_bin = self.sample_recently_ended_response['auctions'][1]
+        auction_non_bin = RecentlyEndedAuction(auction_data_non_bin)
+        timestamp_str_non_bin = auction_non_bin.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z")
+        expected_str_non_bin = f"Auction 'ended_auction2' sold by seller2_uuid to buyer2_uuid at {timestamp_str_non_bin} for 1500000"
+        self.assertEqual(str(auction_non_bin), expected_str_non_bin)
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_str(self, mock_get):
+        """
+        Test the __str__ method of RecentlyEndedAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_recently_ended_response
+
+        recently_ended_auctions = RecentlyEndedAuctions()
+        last_updated_str = recently_ended_auctions.last_updated.strftime("%Y-%m-%d %H:%M:%S %Z")
+        expected_str = f"RecentlyEndedAuctions with 2 auctions as of {last_updated_str}"
+        self.assertEqual(str(recently_ended_auctions), expected_str)
+
+    def test_recently_ended_auction_missing_fields(self):
+        """
+        Test handling of missing optional fields in RecentlyEndedAuction initialization.
+        """
+        auction_data = {
+            "auction_id": "ended_auction_missing",
+            "seller": "seller_missing_uuid",
+            "price": 1000000
+            # Missing 'seller_profile', 'buyer', 'buyer_profile', 'timestamp', 'bin', 'item_bytes'
+        }
+        auction = RecentlyEndedAuction(auction_data)
+
+        self.assertEqual(auction.auction_id, "ended_auction_missing")
+        self.assertEqual(auction.seller, "seller_missing_uuid")
+        self.assertIsNone(auction.seller_profile)
+        self.assertIsNone(auction.buyer)
+        self.assertIsNone(auction.buyer_profile)
+        self.assertIsNone(auction.timestamp)
+        self.assertEqual(auction.price, 1000000)
+        self.assertFalse(auction.bin)  # Default to False
+        self.assertIsNone(auction.item_bytes)
+
+    @patch('requests.get')
+    def test_recently_ended_auctions_empty_response(self, mock_get):
+        """
+        Test handling when the API returns an empty list of auctions.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {
+            "success": True,
+            "lastUpdated": 1728619119062,
+            "auctions": []
+        }
+
+        recently_ended_auctions = RecentlyEndedAuctions()
+        self.assertEqual(len(recently_ended_auctions.auctions), 0)
 
     @patch('requests.get')
     def test_player_auctions_get_auction_by_uuid(self, mock_get):
