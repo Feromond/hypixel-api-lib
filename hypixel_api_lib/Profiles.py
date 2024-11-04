@@ -56,6 +56,53 @@ class CommunityUpgrades:
         upgrading = str(self.currently_upgrading) if self.currently_upgrading else "None"
         return f"Community Upgrades (Currently Upgrading: {upgrading})"
 
+class BankTransaction:
+    """
+    Represents a bank transaction.
+    """
+    def __init__(self, data):
+        self.timestamp = self._convert_timestamp(data.get('timestamp'))
+        self.action = data.get('action')
+        self.initiator_name = data.get('initiator_name')
+        self.amount = data.get('amount')
+
+    def _convert_timestamp(self, timestamp):
+        if timestamp is not None:
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+
+    def __str__(self):
+        timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
+        return f"{self.action} of {self.amount} by {self.initiator_name} at {timestamp_str}"
+
+class Banking:
+    """
+    Represents the banking information of a SkyBlock profile.
+    """
+    def __init__(self, data):
+        self.balance = data.get('balance', 0.0)
+        self.transactions = [BankTransaction(txn) for txn in data.get('transactions', [])]
+
+    def __str__(self):
+        return f"Banking Balance: {self.balance}, Transactions: {len(self.transactions)}"
+
+class DeletionNotice:
+    """
+    Represents a deletion notice for a member profile.
+    """
+    def __init__(self, data):
+        self.timestamp = self._convert_timestamp(data.get('timestamp'))
+
+    def _convert_timestamp(self, timestamp):
+        if timestamp is not None:
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+
+    def __str__(self):
+        timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
+        return f"Deletion Notice at {timestamp_str}"
+
+
 class SkyBlockProfileMember:
     """
     Represents a member of a SkyBlock profile.
@@ -96,6 +143,12 @@ class SkyBlockProfileMember:
         self.shared_inventory = data.get('shared_inventory', {})
         self.collection = data.get('collection', {})
 
+    def is_member_deleted(self):
+        """Check if the current member has been marked as deleted in this profile"""
+        if self.profile.get("deletion_notice"):
+            return True
+        return False
+
     def __str__(self):
         return f"SkyBlockProfileMember UUID: {self.uuid}"
 
@@ -110,12 +163,22 @@ class SkyBlockProfile:
     """
     def __init__(self, data):
         self.profile_id = data.get('profile_id')
-        community_upgrades_data = data.get('community_upgrades', {})
-        self.community_upgrades = CommunityUpgrades(community_upgrades_data)
         self.members = {}
         members_data = data.get('members', {})
         for uuid, member_data in members_data.items():
             self.members[uuid] = SkyBlockProfileMember(uuid, member_data)
+
+        self.community_upgrades = None
+        if 'community_upgrades' in data:
+            self.community_upgrades = CommunityUpgrades(data['community_upgrades'])
+
+        self.banking = None
+        if 'banking' in data:
+            self.banking = Banking(data['banking'])
+
+        self.cute_name = data.get('cute_name', None)
+        self.selected = data.get('selected', None)
+        self.game_mode = data.get('game_mode', "Normal")
 
     def get_member(self, uuid):
         """
