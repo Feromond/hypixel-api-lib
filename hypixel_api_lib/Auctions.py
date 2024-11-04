@@ -3,6 +3,7 @@ import requests
 
 ACTIVE_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions"
 PLAYER_AUCTION_API_URL = "https://api.hypixel.net/skyblock/auction"
+MOJANG_API_URL = "https://api.mojang.com/users/profiles/minecraft/"
 
 class Bid:
     """
@@ -359,6 +360,38 @@ class PlayerAuctions:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
+    def _get_uuid_from_username(self, username):
+        """
+        Fetch the UUID of a player from their username using the Mojang API.
+        (This method may eventually need to migrate to some more general spot. 
+            Not sure how often we may reuse something like this yet)
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            str: The UUID of the player without dashes.
+
+        Raises:
+            ValueError: If the username does not exist.
+            ConnectionError: If there's an error contacting the Mojang API.
+        """
+        try:
+            response = requests.get(MOJANG_API_URL + username)
+            if response.status_code == 204:
+                raise ValueError(f"Username '{username}' does not exist.")
+            response.raise_for_status()
+            data = response.json()
+            uuid = data.get('id')
+            if uuid:
+                return uuid
+            else:
+                raise ValueError(f"UUID not found for username '{username}'.")
+        except requests.exceptions.HTTPError as e:
+            raise ConnectionError(f"HTTP Error while fetching UUID for username '{username}': {e}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching UUID for username '{username}': {e}")
+
     def get_auction_by_uuid(self, auction_uuid):
         """
         Fetch an auction by its auction UUID.
@@ -476,7 +509,6 @@ class PlayerAuctions:
             response = requests.get(self._api_endpoint, params=params)
             response.raise_for_status()
             data = response.json()
-
             if data.get('success'):
                 auctions_data = data.get('auctions', [])
                 auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
@@ -505,6 +537,28 @@ class PlayerAuctions:
                 raise ConnectionError(f"HTTP Error {status_code}: {cause}")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auctions for profile {profile_uuid}: {e}")
+
+    def get_auctions_by_username(self, username):
+        """
+        Fetch auctions by player's username.
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            list of SkyBlockAuction: List of auctions created by the player.
+
+        Raises:
+            ValueError: If the username does not exist.
+            ConnectionError: If there's an error contacting the Mojang or Hypixel API.
+        """
+        try:
+            player_uuid = self._get_uuid_from_username(username)
+            return self.get_auctions_by_player_uuid(player_uuid)
+        except ValueError as ve:
+            raise ve
+        except ConnectionError as ce:
+            raise ce
 
     def __str__(self):
         return f"PlayerAuctions Manager using endpoint {self._api_endpoint}"
