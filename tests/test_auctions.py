@@ -3,7 +3,13 @@ from unittest.mock import patch
 from datetime import datetime, timezone, timedelta
 import requests
 
-from hypixel_api_lib.Active_Auctions import Bid, SkyBlockAuction, AuctionsPage, Auctions
+from hypixel_api_lib.Auctions import (
+    Bid,
+    SkyBlockAuction,
+    AuctionsPage,
+    ActiveAuctions,
+    PlayerAuctions
+)
 
 class TestAuctionsComponent(unittest.TestCase):
     def setUp(self):
@@ -72,6 +78,46 @@ class TestAuctionsComponent(unittest.TestCase):
                 }
             ]
         }
+        # Sample data for player auctions
+        self.sample_player_auctions_response = {
+            "success": True,
+            "auctions": [
+                {
+                    "_id": "auction_player1",
+                    "uuid": "uuid_player1",
+                    "auctioneer": "player1_uuid",
+                    "profile_id": "profile1_id",
+                    "coop": ["coop_member1_uuid", "coop_member2_uuid"],
+                    "start": 1727755200000,
+                    "end": 1728360000000,
+                    "item_name": "Player's Item",
+                    "item_lore": "§7A special item.",
+                    "extra": "Extra info",
+                    "category": "misc",
+                    "tier": "rare",
+                    "starting_bid": 500000,
+                    "item_bytes": None,
+                    "claimed": False,
+                    "claimed_bidders": [],
+                    "highest_bid_amount": 750000,
+                    "bids": [
+                        {
+                            "auction_id": "auction_player1",
+                            "bidder": "bidder3_uuid",
+                            "profile_id": "bidder3_profile_id",
+                            "amount": 750000,
+                            "timestamp": 1727755500000
+                        }
+                    ]
+                }
+            ]
+        }
+
+        # Sample data for Mojang API response
+        self.sample_mojang_response = {
+            "id": "player1_uuid",
+            "name": "PlayerOne"
+        }
 
     @patch('requests.get')
     def test_auctions_page_initialization(self, mock_get):
@@ -81,7 +127,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         page = auctions.get_page(0)
 
         self.assertIsNotNone(page)
@@ -210,7 +256,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         matching_auctions = auctions.search_auctions(item_name="aspect of the dragons", min_price=1000000, max_price=2000000)
 
         self.assertEqual(len(matching_auctions), 1)
@@ -228,7 +274,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         auction = auctions.get_auction_by_id("auction1")
 
         self.assertIsNotNone(auction)
@@ -246,7 +292,7 @@ class TestAuctionsComponent(unittest.TestCase):
         # Simulate an API error
         mock_get.side_effect = requests.exceptions.RequestException("API error")
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         with self.assertRaises(ConnectionError) as context:
             auctions.get_page(0)
         self.assertIn("An error occurred while fetching page 0: API error", str(context.exception))
@@ -265,7 +311,7 @@ class TestAuctionsComponent(unittest.TestCase):
         """
         Test the __str__ method of the Auctions class.
         """
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         expected_str = f"Auctions Manager using endpoint {auctions._api_endpoint}"
         self.assertEqual(str(auctions), expected_str)
 
@@ -350,6 +396,284 @@ class TestAuctionsComponent(unittest.TestCase):
         self.assertEqual(page.totalAuctions, 0)
         self.assertIsNone(page.lastUpdated)
         self.assertEqual(page.auctions, [])
+
+    @patch('requests.get')
+    def test_player_auctions_get_auction_by_uuid(self, mock_get):
+        """
+        Test fetching an auction by its UUID using the PlayerAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_player_auctions_response
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        auction = player_auctions.get_auction_by_uuid("uuid_player1")
+
+        self.assertIsNotNone(auction)
+        self.assertEqual(auction.uuid, "uuid_player1")
+        self.assertEqual(auction.auctioneer, "player1_uuid")
+
+    @patch('requests.get')
+    def test_player_auctions_get_auctions_by_player_uuid(self, mock_get):
+        """
+        Test fetching auctions by player UUID using the PlayerAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_player_auctions_response
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        auctions = player_auctions.get_auctions_by_player_uuid("player1_uuid")
+
+        self.assertEqual(len(auctions), 1)
+        self.assertEqual(auctions[0].auctioneer, "player1_uuid")
+
+    @patch('requests.get')
+    def test_player_auctions_get_auctions_by_profile_uuid(self, mock_get):
+        """
+        Test fetching auctions by profile UUID using the PlayerAuctions class.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = self.sample_player_auctions_response
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        auctions = player_auctions.get_auctions_by_profile_uuid("profile1_id")
+
+        self.assertEqual(len(auctions), 1)
+        self.assertEqual(auctions[0].profile_id, "profile1_id")
+
+    @patch('requests.get')
+    def test_player_auctions_get_auctions_by_username(self, mock_get):
+        """
+        Test fetching auctions by username using the PlayerAuctions class.
+        """
+        # Mock the Mojang API call
+        def mock_mojang_api(url, *args, **kwargs):
+            if "mojang.com" in url:
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = self.sample_mojang_response
+                return mock_response
+            else:
+                # Hypixel API call
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = self.sample_player_auctions_response
+                return mock_response
+
+        mock_get.side_effect = mock_mojang_api
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        auctions = player_auctions.get_auctions_by_username("PlayerOne")
+
+        self.assertEqual(len(auctions), 1)
+        self.assertEqual(auctions[0].auctioneer, "player1_uuid")
+
+    @patch('requests.get')
+    def test_player_auctions_mojang_api_username_not_found(self, mock_get):
+        """
+        Test handling of non-existent username in the Mojang API.
+        """
+        # Mock the Mojang API call to return 204 No Content
+        def mock_mojang_api(url, *args, **kwargs):
+            if "mojang.com" in url:
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 204
+                return mock_response
+            else:
+                mock_response = unittest.mock.Mock()
+                return mock_response
+
+        mock_get.side_effect = mock_mojang_api
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ValueError) as context:
+            player_auctions.get_auctions_by_username("NonExistentUser")
+
+        self.assertIn("Username 'NonExistentUser' does not exist.", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_hypixel_api_error(self, mock_get):
+        """
+        Test handling of errors from the Hypixel API in the PlayerAuctions class.
+        """
+        # Mock the Hypixel API call to return 403 Forbidden
+        def mock_hypixel_api(url, *args, **kwargs):
+            if "hypixel.net" in url:
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 403
+                mock_response.json.return_value = {
+                    "success": False,
+                    "cause": "Invalid API key"
+                }
+                raise requests.exceptions.HTTPError(response=mock_response)
+            else:
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 200
+                mock_response.json.return_value = self.sample_mojang_response
+                return mock_response
+
+        mock_get.side_effect = mock_hypixel_api
+
+        player_auctions = PlayerAuctions(api_key="invalid_api_key")
+
+        with self.assertRaises(PermissionError) as context:
+            player_auctions.get_auctions_by_username("PlayerOne")
+
+        self.assertIn("Forbidden (403): Invalid API key", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_network_error(self, mock_get):
+        """
+        Test handling of network errors in the PlayerAuctions class.
+        """
+        # Mock the network error
+        def mock_network_error(url, *args, **kwargs):
+            raise requests.exceptions.RequestException("Network error")
+
+        mock_get.side_effect = mock_network_error
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ConnectionError) as context:
+            player_auctions.get_auctions_by_player_uuid("player1_uuid")
+
+        self.assertIn("An error occurred while fetching auctions for player player1_uuid: Network error", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_invalid_auction_uuid(self, mock_get):
+        """
+        Test fetching an auction with an invalid auction UUID.
+        """
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {
+            "success": True,
+            "auctions": []
+        }
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        auction = player_auctions.get_auction_by_uuid("invalid_uuid")
+
+        self.assertIsNone(auction)
+
+    @patch('requests.get')
+    def test_player_auctions_invalid_profile_uuid(self, mock_get):
+        """
+        Test fetching auctions with an invalid profile UUID.
+        """
+        # Mock the Hypixel API call to return an error
+        mock_get.return_value.status_code = 422
+        mock_get.return_value.json.return_value = {
+            "success": False,
+            "cause": "Invalid profile UUID"
+        }
+        mock_get.return_value.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_get.return_value)
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ValueError) as context:
+            player_auctions.get_auctions_by_profile_uuid("invalid_profile_uuid")
+
+        self.assertIn("Unprocessable Entity (422): Invalid profile UUID", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_rate_limit(self, mock_get):
+        """
+        Test handling of rate limit exceeded in the PlayerAuctions class.
+        """
+        # Mock the Hypixel API call to return 429 - Too Many Requests
+        mock_get.return_value.status_code = 429
+        mock_get.return_value.json.return_value = {
+            "success": False,
+            "cause": "You have exceeded your rate limit",
+            "throttle": True,
+            "global": False
+        }
+        mock_get.return_value.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_get.return_value)
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ConnectionError) as context:
+            player_auctions.get_auctions_by_player_uuid("player1_uuid")
+
+        self.assertIn("Rate Limit Exceeded (429): You have exceeded your rate limit", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_global_throttle(self, mock_get):
+        """
+        Test handling of global throttle in the PlayerAuctions class.
+        """
+        # Mock the Hypixel API call to return 429 - Too Many Requests with global throttle
+        mock_get.return_value.status_code = 429
+        mock_get.return_value.json.return_value = {
+            "success": False,
+            "cause": "Global throttle in effect",
+            "throttle": True,
+            "global": True
+        }
+        mock_get.return_value.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_get.return_value)
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ConnectionError) as context:
+            player_auctions.get_auctions_by_player_uuid("player1_uuid")
+
+        self.assertIn("Global Throttle (429): Global throttle in effect", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_mojang_api_error(self, mock_get):
+        """
+        Test handling of errors from the Mojang API.
+        """
+        # Mock the Mojang API call to return an error
+        def mock_mojang_api(url, *args, **kwargs):
+            if "mojang.com" in url:
+                mock_response = unittest.mock.Mock()
+                mock_response.status_code = 500
+                mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(response=mock_response)
+                return mock_response
+            else:
+                mock_response = unittest.mock.Mock()
+                return mock_response
+
+        mock_get.side_effect = mock_mojang_api
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ConnectionError) as context:
+            player_auctions.get_auctions_by_username("PlayerOne")
+
+        self.assertIn("HTTP Error while fetching UUID for username 'PlayerOne'", str(context.exception))
+
+    @patch('requests.get')
+    def test_player_auctions_mojang_api_network_error(self, mock_get):
+        """
+        Test handling of network errors when calling the Mojang API.
+        """
+        # Mock the network error for Mojang API
+        def mock_network_error(url, *args, **kwargs):
+            if "mojang.com" in url:
+                raise requests.exceptions.RequestException("Network error")
+            else:
+                mock_response = unittest.mock.Mock()
+                return mock_response
+
+        mock_get.side_effect = mock_network_error
+
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+
+        with self.assertRaises(ConnectionError) as context:
+            player_auctions.get_auctions_by_username("PlayerOne")
+
+        self.assertIn("An error occurred while fetching UUID for username 'PlayerOne': Network error", str(context.exception))
+
+    def test_player_auctions_str(self):
+        """
+        Test the __str__ method of the PlayerAuctions class.
+        """
+        player_auctions = PlayerAuctions(api_key="test_api_key")
+        expected_str = f"PlayerAuctions Manager using endpoint {player_auctions._api_endpoint}"
+        self.assertEqual(str(player_auctions), expected_str)
+
 
 if __name__ == '__main__':
     unittest.main()

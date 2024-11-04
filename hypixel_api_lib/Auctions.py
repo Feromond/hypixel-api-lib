@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 import requests
 
 ACTIVE_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions"
+PLAYER_AUCTION_API_URL = "https://api.hypixel.net/skyblock/auction"
+MOJANG_API_URL = "https://api.mojang.com/users/profiles/minecraft/"
 
 class Bid:
     """
@@ -196,7 +198,7 @@ class AuctionsPage:
     def __str__(self):
         return f"Auctions Page {self.page}/{self.totalPages}, Total Auctions: {self.totalAuctions}"
 
-class Auctions:
+class ActiveAuctions:
     """
     Manages fetching and storing auction data from the Hypixel SkyBlock Auctions API.
 
@@ -338,3 +340,225 @@ class Auctions:
 
     def __str__(self):
         return f"Auctions Manager using endpoint {self._api_endpoint}"
+
+class PlayerAuctions:
+    """
+    Manages fetching player-specific auctions from the Hypixel SkyBlock Auctions API.
+
+    Attributes:
+        api_key (str): The API key for accessing the Hypixel API.
+        api_endpoint (str): The API endpoint URL.
+    """
+
+    def __init__(self, api_key, api_endpoint=PLAYER_AUCTION_API_URL):
+        self._api_endpoint = api_endpoint
+        self.api_key = api_key
+
+    def _convert_timestamp(self, timestamp):
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
+            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
+        return None
+
+    def _get_uuid_from_username(self, username):
+        """
+        Fetch the UUID of a player from their username using the Mojang API.
+        (This method may eventually need to migrate to some more general spot. 
+            Not sure how often we may reuse something like this yet)
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            str: The UUID of the player without dashes.
+
+        Raises:
+            ValueError: If the username does not exist.
+            ConnectionError: If there's an error contacting the Mojang API.
+        """
+        try:
+            response = requests.get(MOJANG_API_URL + username)
+            if response.status_code == 204:
+                raise ValueError(f"Username '{username}' does not exist.")
+            response.raise_for_status()
+            data = response.json()
+            uuid = data.get('id')
+            if uuid:
+                return uuid
+            else:
+                raise ValueError(f"UUID not found for username '{username}'.")
+        except requests.exceptions.HTTPError as e:
+            raise ConnectionError(f"HTTP Error while fetching UUID for username '{username}': {e}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching UUID for username '{username}': {e}")
+
+    def get_auction_by_uuid(self, auction_uuid):
+        """
+        Fetch an auction by its auction UUID.
+
+        Args:
+            auction_uuid (str): The UUID of the auction.
+
+        Returns:
+            SkyBlockAuction or None: The auction object, or None if not found.
+        """
+        params = {
+            'uuid': auction_uuid,
+            'key': self.api_key
+        }
+        try:
+            response = requests.get(self._api_endpoint, params=params)
+            response.raise_for_status()
+            data = response.json()
+            if data.get('success'):
+                auctions_data = data.get('auctions', [])
+                if auctions_data:
+                    # There should only be one auction in this case
+                    auction_data = auctions_data[0]
+                    auction = SkyBlockAuction(auction_data)
+                    return auction
+                else:
+                    return None
+            else:
+                cause = data.get('cause', 'Unknown error')
+                raise ValueError(f"API response was not successful: {cause}")
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code
+            error_data = e.response.json()
+            cause = error_data.get('cause', 'Unknown error')
+            if status_code == 400:
+                raise ValueError(f"Bad Request (400): {cause}")
+            elif status_code == 403:
+                raise PermissionError(f"Forbidden (403): {cause}")
+            elif status_code == 422:
+                raise ValueError(f"Unprocessable Entity (422): {cause}")
+            elif status_code == 429:
+                throttle = error_data.get('throttle', False)
+                global_throttle = error_data.get('global', False)
+                if global_throttle:
+                    raise ConnectionError(f"Global Throttle (429): {cause}")
+                else:
+                    raise ConnectionError(f"Rate Limit Exceeded (429): {cause}")
+            else:
+                raise ConnectionError(f"HTTP Error {status_code}: {cause}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching auction {auction_uuid}: {e}")
+
+    def get_auctions_by_player_uuid(self, player_uuid):
+        """
+        Fetch auctions by player UUID.
+
+        Args:
+            player_uuid (str): The UUID of the player.
+
+        Returns:
+            list of SkyBlockAuction: List of auctions created by the player.
+        """
+        params = {
+            'player': player_uuid,
+            'key': self.api_key
+        }
+        try:
+            response = requests.get(self._api_endpoint, params=params)
+            response.raise_for_status()
+            data = response.json()
+            if data.get('success'):
+                auctions_data = data.get('auctions', [])
+                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
+                return auctions
+            else:
+                cause = data.get('cause', 'Unknown error')
+                raise ValueError(f"API response was not successful: {cause}")
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code
+            error_data = e.response.json()
+            cause = error_data.get('cause', 'Unknown error')
+            if status_code == 400:
+                raise ValueError(f"Bad Request (400): {cause}")
+            elif status_code == 403:
+                raise PermissionError(f"Forbidden (403): {cause}")
+            elif status_code == 422:
+                raise ValueError(f"Unprocessable Entity (422): {cause}")
+            elif status_code == 429:
+                throttle = error_data.get('throttle', False)
+                global_throttle = error_data.get('global', False)
+                if global_throttle:
+                    raise ConnectionError(f"Global Throttle (429): {cause}")
+                else:
+                    raise ConnectionError(f"Rate Limit Exceeded (429): {cause}")
+            else:
+                raise ConnectionError(f"HTTP Error {status_code}: {cause}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching auctions for player {player_uuid}: {e}")
+
+    def get_auctions_by_profile_uuid(self, profile_uuid):
+        """
+        Fetch auctions by profile UUID.
+
+        Args:
+            profile_uuid (str): The UUID of the profile.
+
+        Returns:
+            list of SkyBlockAuction: List of auctions associated with the profile.
+        """
+        params = {
+            'profile': profile_uuid,
+            'key': self.api_key
+        }
+        try:
+            response = requests.get(self._api_endpoint, params=params)
+            response.raise_for_status()
+            data = response.json()
+            if data.get('success'):
+                auctions_data = data.get('auctions', [])
+                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
+                return auctions
+            else:
+                cause = data.get('cause', 'Unknown error')
+                raise ValueError(f"API response was not successful: {cause}")
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code
+            error_data = e.response.json()
+            cause = error_data.get('cause', 'Unknown error')
+            if status_code == 400:
+                raise ValueError(f"Bad Request (400): {cause}")
+            elif status_code == 403:
+                raise PermissionError(f"Forbidden (403): {cause}")
+            elif status_code == 422:
+                raise ValueError(f"Unprocessable Entity (422): {cause}")
+            elif status_code == 429:
+                throttle = error_data.get('throttle', False)
+                global_throttle = error_data.get('global', False)
+                if global_throttle:
+                    raise ConnectionError(f"Global Throttle (429): {cause}")
+                else:
+                    raise ConnectionError(f"Rate Limit Exceeded (429): {cause}")
+            else:
+                raise ConnectionError(f"HTTP Error {status_code}: {cause}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching auctions for profile {profile_uuid}: {e}")
+
+    def get_auctions_by_username(self, username):
+        """
+        Fetch auctions by player's username.
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            list of SkyBlockAuction: List of auctions created by the player.
+
+        Raises:
+            ValueError: If the username does not exist.
+            ConnectionError: If there's an error contacting the Mojang or Hypixel API.
+        """
+        try:
+            player_uuid = self._get_uuid_from_username(username)
+            return self.get_auctions_by_player_uuid(player_uuid)
+        except ValueError as ve:
+            raise ve
+        except ConnectionError as ce:
+            raise ce
+
+    def __str__(self):
+        return f"PlayerAuctions Manager using endpoint {self._api_endpoint}"

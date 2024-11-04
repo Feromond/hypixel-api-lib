@@ -1,7 +1,7 @@
-from hypixel_api_lib.Active_Auctions import Auctions
+from hypixel_api_lib.Auctions import ActiveAuctions
 
 # Initialize the Auctions manager
-auctions_manager = Auctions()
+auctions_manager = ActiveAuctions()
 
 # Fetch the first page of auctions
 first_page = auctions_manager.get_page(0)
@@ -25,7 +25,7 @@ for auction in matching_auctions:
 
 
 # If you prefer to preload all data for faster local speed on a given snapshot:
-auctions_manager_preloaded = Auctions(preload_all=True)
+auctions_manager_preloaded = ActiveAuctions(preload_all=True)
 
 # Now searches will use the preloaded data
 matching_auctions = auctions_manager_preloaded.search_auctions(
