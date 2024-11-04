@@ -1,7 +1,8 @@
 import requests
 from datetime import datetime, timezone
 
-PROFILE_API_URL = "https://api.hypixel.net/v2/skyblock/profile"
+PROFILE_API_URL = r"https://api.hypixel.net/v2/skyblock/profile"
+PROFILES_API_URL = r"https://api.hypixel.net/v2/skyblock/profiles"
 
 class CommunityUpgradeState:
     """
@@ -61,9 +62,8 @@ class SkyBlockProfileMember:
 
     Attributes:
         uuid (str): The UUID of the member.
-        All member data fields as per the provided keys.
+        All member data fields.
     """
-
     def __init__(self, uuid, data):
         self.uuid = uuid
         self.rift = data.get('rift', {})
@@ -117,8 +117,29 @@ class SkyBlockProfile:
         for uuid, member_data in members_data.items():
             self.members[uuid] = SkyBlockProfileMember(uuid, member_data)
 
+    def get_member(self, uuid):
+        """
+        Retrieve a member by UUID.
+
+        Args:
+            uuid (str): The UUID of the member.
+
+        Returns:
+            SkyBlockProfileMember or None: The member object, or None if not found.
+        """
+        return self.members.get(uuid)
+
+    def list_member_uuids(self):
+        """
+        List all member UUIDs in the profile.
+
+        Returns:
+            list of str: List of member UUIDs.
+        """
+        return list(self.members.keys())
+
     def __str__(self):
-        return f"SkyBlockProfile ID: {self.profile_id}, Members: {list(self.members.keys())}"
+        return f"SkyBlockProfile ID: {self.profile_id}, Members: {self.list_member_uuids()}"
 
 class SkyBlockProfiles:
     """
@@ -128,13 +149,14 @@ class SkyBlockProfiles:
         api_key (str): The API key required for the request.
         api_endpoint (str): The endpoint URL to fetch the profile data.
     """
-    def __init__(self, api_key, api_endpoint=PROFILE_API_URL):
-        self.api_endpoint = api_endpoint
+    def __init__(self, api_key):
         self.api_key = api_key
+        self._profile_endpoint = PROFILE_API_URL
+        self._profiles_endpoint = PROFILES_API_URL
 
     def get_profile(self, profile_id):
         """
-        Fetches the profile data from the API.
+        Fetches a single profile by profile ID.
 
         Args:
             profile_id (str): The profile ID to fetch.
@@ -144,7 +166,7 @@ class SkyBlockProfiles:
         """
         try:
             params = {'key': self.api_key, 'profile': profile_id}
-            response = requests.get(self.api_endpoint, params=params)
+            response = requests.get(self._profile_endpoint, params=params)
             response.raise_for_status()
             data = response.json()
 
@@ -154,7 +176,7 @@ class SkyBlockProfiles:
             else:
                 raise ValueError("No profile data available in the response")
         except requests.exceptions.HTTPError as e:
-            response_status = response.status_code
+            response_status = e.response.status_code
             if response_status == 403:
                 raise PermissionError("Access forbidden: Invalid API key.")
             elif response_status == 429:
@@ -163,3 +185,52 @@ class SkyBlockProfiles:
                 raise ConnectionError(f"An error occurred while fetching the profile: {e}")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching the profile: {e}")
+
+    def get_profiles_by_player_uuid(self, player_uuid):
+        """
+        Fetches all profiles associated with a player UUID.
+
+        Args:
+            player_uuid (str): The UUID of the player.
+
+        Returns:
+            list of SkyBlockProfile: A list of SkyBlockProfile objects.
+        """
+        try:
+            params = {'key': self.api_key, 'uuid': player_uuid}
+            response = requests.get(self._profiles_endpoint, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            if data.get('success') and 'profiles' in data:
+                profiles_data = data['profiles']
+                profiles = [SkyBlockProfile(profile_data) for profile_data in profiles_data]
+                return profiles
+            else:
+                raise ValueError("No profiles data available in the response")
+        except requests.exceptions.HTTPError as e:
+            response_status = e.response.status_code
+            if response_status == 403:
+                raise PermissionError("Access forbidden: Invalid API key.")
+            elif response_status == 429:
+                raise ConnectionError("Request limit reached: Throttling in effect.")
+            else:
+                raise ConnectionError(f"An error occurred while fetching the profiles: {e}")
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"An error occurred while fetching the profiles: {e}")
+
+    def get_selected_profile_by_player_uuid(self, player_uuid):
+        """
+        Fetches the selected profile for a player UUID.
+
+        Args:
+            player_uuid (str): The UUID of the player.
+
+        Returns:
+            SkyBlockProfile or None: The selected SkyBlockProfile object, or None if not found.
+        """
+        profiles = self.get_profiles_by_player_uuid(player_uuid)
+        for profile in profiles:
+            if hasattr(profile, 'selected') and profile.selected:
+                return profile
+        return None
