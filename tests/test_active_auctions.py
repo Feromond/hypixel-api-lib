@@ -3,7 +3,7 @@ from unittest.mock import patch
 from datetime import datetime, timezone, timedelta
 import requests
 
-from hypixel_api_lib.Active_Auctions import Bid, SkyBlockAuction, AuctionsPage, Auctions
+from hypixel_api_lib.ActiveAuctions import Bid, SkyBlockAuction, AuctionsPage, ActiveAuctions
 
 class TestAuctionsComponent(unittest.TestCase):
     def setUp(self):
@@ -81,7 +81,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         page = auctions.get_page(0)
 
         self.assertIsNotNone(page)
@@ -210,7 +210,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         matching_auctions = auctions.search_auctions(item_name="aspect of the dragons", min_price=1000000, max_price=2000000)
 
         self.assertEqual(len(matching_auctions), 1)
@@ -228,7 +228,7 @@ class TestAuctionsComponent(unittest.TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = self.sample_auction_page_response
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         auction = auctions.get_auction_by_id("auction1")
 
         self.assertIsNotNone(auction)
@@ -246,7 +246,7 @@ class TestAuctionsComponent(unittest.TestCase):
         # Simulate an API error
         mock_get.side_effect = requests.exceptions.RequestException("API error")
 
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         with self.assertRaises(ConnectionError) as context:
             auctions.get_page(0)
         self.assertIn("An error occurred while fetching page 0: API error", str(context.exception))
@@ -265,7 +265,7 @@ class TestAuctionsComponent(unittest.TestCase):
         """
         Test the __str__ method of the Auctions class.
         """
-        auctions = Auctions()
+        auctions = ActiveAuctions()
         expected_str = f"Auctions Manager using endpoint {auctions._api_endpoint}"
         self.assertEqual(str(auctions), expected_str)
 

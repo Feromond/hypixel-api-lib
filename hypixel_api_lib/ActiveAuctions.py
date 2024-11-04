@@ -196,7 +196,7 @@ class AuctionsPage:
     def __str__(self):
         return f"Auctions Page {self.page}/{self.totalPages}, Total Auctions: {self.totalAuctions}"
 
-class Auctions:
+class ActiveAuctions:
     """
     Manages fetching and storing auction data from the Hypixel SkyBlock Auctions API.
 
