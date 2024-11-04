@@ -583,13 +583,15 @@ class SkyBlockProfiles:
             response.raise_for_status()
             data = response.json()
 
-            if data.get('success') and 'profile' in data:
+            if data.get('success') and data.get('profile') is not None:
                 profile_data = data['profile']
                 return SkyBlockProfile(profile_data)
             else:
                 raise ValueError("No profile data available in the response")
         except requests.exceptions.HTTPError as e:
-            response_status = e.response.status_code
+            response_status = None
+            if e.response is not None:
+                response_status = e.response.status_code
             if response_status == 403:
                 raise PermissionError("Access forbidden: Invalid API key.")
             elif response_status == 429:
