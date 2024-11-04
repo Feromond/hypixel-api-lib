@@ -2,7 +2,7 @@ import requests
 import re
 from datetime import datetime
 
-NEWS_API_URL = "https://api.hypixel.net/skyblock/news"
+NEWS_API_URL = r"https://api.hypixel.net/skyblock/news"
 
 class SkyBlockNewsItem:
     """

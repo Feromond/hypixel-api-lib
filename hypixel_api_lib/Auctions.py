@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 import requests
 
-ACTIVE_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions"
-RECENTLY_ENDED_AUCTIONS_API_URL = "https://api.hypixel.net/skyblock/auctions_ended"
-PLAYER_AUCTION_API_URL = "https://api.hypixel.net/skyblock/auction"
-MOJANG_API_URL = "https://api.mojang.com/users/profiles/minecraft/"
+ACTIVE_AUCTIONS_API_URL = r"https://api.hypixel.net/skyblock/auctions"
+RECENTLY_ENDED_AUCTIONS_API_URL = r"https://api.hypixel.net/skyblock/auctions_ended"
+PLAYER_AUCTION_API_URL = r"https://api.hypixel.net/skyblock/auction"
+MOJANG_API_URL = r"https://api.mojang.com/users/profiles/minecraft/"
 
 class Bid:
     """
