@@ -1,4 +1,4 @@
-from hypixel_api_lib.Auctions import RecentlyEndedAuctions
+from hypixel_api_lib import RecentlyEndedAuctions
 
 recent_auctions = RecentlyEndedAuctions()
 

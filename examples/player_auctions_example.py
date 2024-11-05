@@ -1,4 +1,4 @@
-from hypixel_api_lib.Auctions import PlayerAuctions
+from hypixel_api_lib import PlayerAuctions
 from dotenv import load_dotenv
 import os
 

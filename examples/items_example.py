@@ -1,4 +1,4 @@
-from hypixel_api_lib.Items import Items
+from hypixel_api_lib import Items
 
 items = Items()
 

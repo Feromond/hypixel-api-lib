@@ -1,4 +1,4 @@
-from hypixel_api_lib.Auctions import ActiveAuctions
+from hypixel_api_lib import ActiveAuctions
 
 # Initialize the Auctions manager
 auctions_manager = ActiveAuctions()

@@ -1,5 +1,5 @@
 from datetime import timezone, timedelta
-from hypixel_api_lib.Bingo import BingoEvents
+from hypixel_api_lib import BingoEvents
 from zoneinfo import ZoneInfo
 
 def main():

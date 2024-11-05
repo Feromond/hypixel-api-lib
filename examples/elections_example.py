@@ -1,4 +1,4 @@
-from hypixel_api_lib.Elections import *
+from hypixel_api_lib import Elections
 
 e = Elections()
 

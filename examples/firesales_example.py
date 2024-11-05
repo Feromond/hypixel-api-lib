@@ -1,5 +1,5 @@
 import pytz 
-from hypixel_api_lib.FireSales import FireSales
+from hypixel_api_lib import FireSales
 
 fire_sales = FireSales()
 all_sales = fire_sales.sales
