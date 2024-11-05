@@ -1,4 +1,10 @@
 class ExperienceData:
+    """
+    Represents the experience points of the player.
+
+    Attributes:
+        experience (int): The player's total experience points.
+    """
     def __init__(self, experience):
         self.experience = experience
 
@@ -7,6 +13,12 @@ class ExperienceData:
 
 
 class CompletionsData:
+    """
+    Represents completion milestones achieved by the player.
+
+    Attributes:
+        completions (dict): Dictionary mapping completion types to their values.
+    """
     def __init__(self, completions):
         self.completions = completions
 
@@ -15,6 +27,12 @@ class CompletionsData:
 
 
 class TaskData:
+    """
+    Represents the list of tasks the player has completed.
+
+    Attributes:
+        completed_tasks (list): List of strings representing completed tasks.
+    """
     def __init__(self, completed_tasks):
         self.completed_tasks = completed_tasks
 
@@ -23,6 +41,12 @@ class TaskData:
 
 
 class PetScore:
+    """
+    Represents the player's highest pet score.
+
+    Attributes:
+        highest_pet_score (int): The highest score the player has achieved with pets.
+    """
     def __init__(self, highest_pet_score):
         self.highest_pet_score = highest_pet_score
 
@@ -31,6 +55,13 @@ class PetScore:
 
 
 class MigrationData:
+    """
+    Represents migration details, tracking data transitions.
+
+    Attributes:
+        migrated (bool): Indicates if the player data was migrated.
+        migrated_completions_2 (bool): Indicates if the second phase of migration is complete.
+    """
     def __init__(self, migrated, migrated_completions_2):
         self.migrated = migrated
         self.migrated_completions_2 = migrated_completions_2
@@ -40,6 +71,12 @@ class MigrationData:
 
 
 class TaskViews:
+    """
+    Represents the list of tasks recently viewed by the player.
+
+    Attributes:
+        last_viewed_tasks (list): List of strings representing recently viewed tasks.
+    """
     def __init__(self, last_viewed_tasks):
         self.last_viewed_tasks = last_viewed_tasks
 
@@ -48,6 +85,13 @@ class TaskViews:
 
 
 class EventStats:
+    """
+    Represents statistics related to special in-game events.
+
+    Attributes:
+        fishing_festival_sharks_killed (int): Number of sharks killed during the fishing festival.
+        mining_fiesta_ores_mined (int): Number of ores mined during the mining fiesta.
+    """
     def __init__(self, fishing_festival_sharks_killed, mining_fiesta_ores_mined):
         self.fishing_festival_sharks_killed = fishing_festival_sharks_killed
         self.mining_fiesta_ores_mined = mining_fiesta_ores_mined
@@ -58,6 +102,15 @@ class EventStats:
 
 
 class SymbolData:
+    """
+    Represents data related to player's selected symbol, bonuses, and additional status flags.
+
+    Attributes:
+        selected_symbol (str): The currently selected symbol for the player.
+        bop_bonus (str): The bonus effect currently active for the player.
+        claimed_talisman (bool): Indicates if the player has claimed the talisman.
+        category_expanded (bool): Indicates if the player's category is expanded.
+    """
     def __init__(self, selected_symbol, bop_bonus, claimed_talisman, category_expanded):
         self.selected_symbol = selected_symbol
         self.bop_bonus = bop_bonus
@@ -71,17 +124,17 @@ class SymbolData:
 
 class LevelingData:
     """
-    Represents leveling data for a SkyBlock profile member, with individual components for each aspect.
+    Represents the leveling data for a SkyBlock profile member, broken down into specific components.
 
     Attributes:
-        experience_data (ExperienceData): The player's experience.
-        completions_data (CompletionsData): Completion milestones.
-        task_data (TaskData): Data for completed tasks.
-        pet_score (PetScore): The highest pet score achieved.
-        migration_data (MigrationData): Migration status details.
-        task_views (TaskViews): Recently viewed tasks.
-        event_stats (EventStats): Statistics for events like fishing festivals.
-        symbol_data (SymbolData): Selected symbol, bonuses, and other status flags.
+        experience_data (ExperienceData): Tracks total experience points.
+        completions_data (CompletionsData): Holds details about completion milestones.
+        task_data (TaskData): Manages completed tasks.
+        pet_score (PetScore): Stores the player's highest pet score.
+        migration_data (MigrationData): Holds migration-related data.
+        task_views (TaskViews): Tracks tasks recently viewed by the player.
+        event_stats (EventStats): Holds statistics related to special events.
+        symbol_data (SymbolData): Stores selected symbol, bonus, and other related attributes.
     """
 
     def __init__(self, data):
