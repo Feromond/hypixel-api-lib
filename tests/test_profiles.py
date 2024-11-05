@@ -15,6 +15,7 @@ from hypixel_api_lib.member.Events import *
 from hypixel_api_lib.member.GardenPlayerData import *
 from hypixel_api_lib.member.PetsData import *
 from hypixel_api_lib.member.Rift import *
+from hypixel_api_lib.member.AccessoryBagStorage import *
 
 
 class TestSkyBlockProfiles(unittest.TestCase):
@@ -871,6 +872,107 @@ class TestRiftData(unittest.TestCase):
         self.assertIn("Village Plaza: VillagePlaza(Murder:", output)
         self.assertIn("Inventory: InventoryData(Type: 0,", output)
         self.assertIn("Ender Chest Page Icons: []", output)
+
+class TestAccessoryBagStorage(unittest.TestCase):
+    def test_accessory_bag_storage_initialization(self):
+        """
+        Test that AccessoryBagStorage initializes correctly with tuning data.
+        """
+        sample_data = {
+            'tuning': {
+                'slot_0': {'health': 0, 'critical_damage': 100, 'refund': True},
+                'slot_1': {'defense': 50, 'strength': 20},
+                'highest_unlocked_slot': 2,
+                'refund_1': True
+            },
+            'selected_power': 'hurtful',
+            'unlocked_powers': ['hurtful', 'bloody', 'silky'],
+            'bag_upgrades_purchased': 20,
+            'highest_magical_power': 1200
+        }
+        accessory_bag = AccessoryBagStorage(sample_data)
+        self.assertEqual(accessory_bag.selected_power, 'hurtful')
+        self.assertEqual(accessory_bag.unlocked_powers, ['hurtful', 'bloody', 'silky'])
+        self.assertEqual(accessory_bag.bag_upgrades_purchased, 20)
+        self.assertEqual(accessory_bag.highest_magical_power, 1200)
+        self.assertEqual(accessory_bag.highest_unlocked_slot, 2)
+        
+        # Check tuning slots
+        self.assertIn(0, accessory_bag.tuning)
+        self.assertEqual(accessory_bag.tuning[0].critical_damage, 100)
+        self.assertTrue(accessory_bag.tuning[0].refund)
+        self.assertEqual(accessory_bag.tuning[1].defense, 50)
+        self.assertEqual(accessory_bag.tuning[1].strength, 20)
+
+    def test_accessory_bag_storage_str(self):
+        """
+        Test the __str__ method of AccessoryBagStorage.
+        """
+        sample_data = {
+            'tuning': {
+                'slot_0': {'health': 0, 'critical_damage': 100},
+                'slot_1': {'defense': 50, 'strength': 20}
+            },
+            'selected_power': 'hurtful',
+            'unlocked_powers': ['hurtful', 'bloody', 'silky'],
+            'bag_upgrades_purchased': 20,
+            'highest_magical_power': 1200
+        }
+        accessory_bag = AccessoryBagStorage(sample_data)
+        bag_str = str(accessory_bag)
+        self.assertIn("Selected Power: hurtful", bag_str)
+        self.assertIn("Unlocked Powers: ['hurtful', 'bloody', 'silky']", bag_str)
+        self.assertIn("Bag Upgrades Purchased: 20", bag_str)
+        self.assertIn("Highest Magical Power: 1200", bag_str)
+        self.assertIn("Slot 0: SlotTuning", bag_str)
+        self.assertIn("Slot 1: SlotTuning", bag_str)
+
+    def test_slot_tuning_initialization(self):
+        """
+        Test that SlotTuning initializes correctly with data.
+        """
+        sample_data = {
+            'health': 100,
+            'defense': 50,
+            'walk_speed': 10,
+            'strength': 75,
+            'critical_damage': 120,
+            'critical_chance': 5,
+            'attack_speed': 15,
+            'intelligence': 30,
+            'purchase_ts': 1716390031780,
+            'refund': True
+        }
+        slot_tuning = SlotTuning(sample_data)
+        self.assertEqual(slot_tuning.health, 100)
+        self.assertEqual(slot_tuning.defense, 50)
+        self.assertEqual(slot_tuning.walk_speed, 10)
+        self.assertEqual(slot_tuning.strength, 75)
+        self.assertEqual(slot_tuning.critical_damage, 120)
+        self.assertEqual(slot_tuning.critical_chance, 5)
+        self.assertEqual(slot_tuning.attack_speed, 15)
+        self.assertEqual(slot_tuning.intelligence, 30)
+        self.assertTrue(slot_tuning.refund)
+        self.assertIsInstance(slot_tuning.purchase_ts, datetime)
+
+    def test_slot_tuning_str(self):
+        """
+        Test the __str__ method of SlotTuning.
+        """
+        sample_data = {
+            'health': 0,
+            'defense': 10,
+            'walk_speed': 5,
+            'critical_damage': 50,
+            'purchase_ts': 1716390031780
+        }
+        slot_tuning = SlotTuning(sample_data)
+        tuning_str = str(slot_tuning)
+        self.assertIn("Health: 0", tuning_str)
+        self.assertIn("Defense: 10", tuning_str)
+        self.assertIn("Walk Speed: 5", tuning_str)
+        self.assertIn("Critical Damage: 50", tuning_str)
+        self.assertIn("Purchase Timestamp", tuning_str)
 
 
 
