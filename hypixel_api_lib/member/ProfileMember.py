@@ -5,6 +5,7 @@ from .Events import Events
 from .GardenPlayerData import GardenPlayerData
 from .PetsData import PetsData
 from .Rift import RiftData
+from .AccessoryBagStorage import AccessoryBagStorage
 
 class DeletionNotice:
     """
@@ -75,7 +76,7 @@ class SkyBlockProfileMember:
         self.events = Events(data.get('events', {}))
         self.garden_player_data = GardenPlayerData(data.get('garden_player_data', {}))
         self.pets_data = PetsData(data.get('pets_data', {}))
-        self.accessory_bag_storage = data.get('accessory_bag_storage', {})
+        self.accessory_bag_storage = AccessoryBagStorage(data.get('accessory_bag_storage', {}))
         self.leveling = data.get('leveling', {})
         self.item_data = data.get('item_data', {})
         self.jacobs_contest = data.get('jacobs_contest', {})
