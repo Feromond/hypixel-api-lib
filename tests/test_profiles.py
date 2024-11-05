@@ -4,7 +4,6 @@ import requests
 from datetime import datetime
 import base64
 import zlib
-from io import BytesIO
 import gzip
 
 from hypixel_api_lib.Profiles import *
@@ -16,7 +15,7 @@ from hypixel_api_lib.member.GardenPlayerData import *
 from hypixel_api_lib.member.PetsData import *
 from hypixel_api_lib.member.Rift import *
 from hypixel_api_lib.member.AccessoryBagStorage import *
-
+from hypixel_api_lib.member.Leveling import *
 
 class TestSkyBlockProfiles(unittest.TestCase):
     def setUp(self):
@@ -974,7 +973,133 @@ class TestAccessoryBagStorage(unittest.TestCase):
         self.assertIn("Critical Damage: 50", tuning_str)
         self.assertIn("Purchase Timestamp", tuning_str)
 
+class TestLevelingData(unittest.TestCase):
+    def setUp(self):
+        self.sample_data = {
+            "experience": 33493,
+            "completions": {"NUCLEUS_RUNS": 21},
+            "completed_tasks": ["OBJECTIVE_EXPLORE_NETHER_ISLAND", "DIAMOND_ESSENCE_RADIANT_FISHER_1"],
+            "highest_pet_score": 356,
+            "migrated": True,
+            "migrated_completions_2": True,
+            "last_viewed_tasks": ["TROPHY_FISH_GROUP", "ABIPHONE_lumber_merchant"],
+            "fishing_festival_sharks_killed": 96,
+            "mining_fiesta_ores_mined": 4220,
+            "selected_symbol": "DIAMOND_MINING_HELIX",
+            "bop_bonus": "EXTRA_INFLICTION",
+            "claimed_talisman": True,
+            "category_expanded": False
+        }
 
+    def test_experience_data(self):
+        """
+        Test ExperienceData initialization and attribute correctness.
+        """
+        experience_data = ExperienceData(self.sample_data["experience"])
+        self.assertEqual(experience_data.experience, 33493)
+        self.assertEqual(str(experience_data), "ExperienceData(Experience: 33493)")
+
+    def test_completions_data(self):
+        """
+        Test CompletionsData initialization and attribute correctness.
+        """
+        completions_data = CompletionsData(self.sample_data["completions"])
+        self.assertEqual(completions_data.completions["NUCLEUS_RUNS"], 21)
+        self.assertEqual(str(completions_data), "CompletionsData({'NUCLEUS_RUNS': 21})")
+
+    def test_task_data(self):
+        """
+        Test TaskData initialization and attribute correctness.
+        """
+        task_data = TaskData(self.sample_data["completed_tasks"])
+        self.assertEqual(len(task_data.completed_tasks), 2)
+        self.assertIn("OBJECTIVE_EXPLORE_NETHER_ISLAND", task_data.completed_tasks)
+        self.assertEqual(str(task_data), "TaskData(Completed Tasks: 2)")
+
+    def test_pet_score(self):
+        """
+        Test PetScore initialization and attribute correctness.
+        """
+        pet_score = PetScore(self.sample_data["highest_pet_score"])
+        self.assertEqual(pet_score.highest_pet_score, 356)
+        self.assertEqual(str(pet_score), "PetScore(Highest Pet Score: 356)")
+
+    def test_migration_data(self):
+        """
+        Test MigrationData initialization and attribute correctness.
+        """
+        migration_data = MigrationData(self.sample_data["migrated"], self.sample_data["migrated_completions_2"])
+        self.assertTrue(migration_data.migrated)
+        self.assertTrue(migration_data.migrated_completions_2)
+        self.assertEqual(str(migration_data), "MigrationData(Migrated: True, Migrated Completions 2: True)")
+
+    def test_task_views(self):
+        """
+        Test TaskViews initialization and attribute correctness.
+        """
+        task_views = TaskViews(self.sample_data["last_viewed_tasks"])
+        self.assertEqual(len(task_views.last_viewed_tasks), 2)
+        self.assertIn("TROPHY_FISH_GROUP", task_views.last_viewed_tasks)
+        self.assertEqual(str(task_views), "TaskViews(Last Viewed Tasks: ['TROPHY_FISH_GROUP', 'ABIPHONE_lumber_merchant'])")
+
+    def test_event_stats(self):
+        """
+        Test EventStats initialization and attribute correctness.
+        """
+        event_stats = EventStats(self.sample_data["fishing_festival_sharks_killed"], self.sample_data["mining_fiesta_ores_mined"])
+        self.assertEqual(event_stats.fishing_festival_sharks_killed, 96)
+        self.assertEqual(event_stats.mining_fiesta_ores_mined, 4220)
+        self.assertEqual(str(event_stats), "EventStats(Fishing Festival Sharks Killed: 96, Mining Fiesta Ores Mined: 4220)")
+
+    def test_symbol_data(self):
+        """
+        Test SymbolData initialization and attribute correctness.
+        """
+        symbol_data = SymbolData(
+            self.sample_data["selected_symbol"],
+            self.sample_data["bop_bonus"],
+            self.sample_data["claimed_talisman"],
+            self.sample_data["category_expanded"]
+        )
+        self.assertEqual(symbol_data.selected_symbol, "DIAMOND_MINING_HELIX")
+        self.assertEqual(symbol_data.bop_bonus, "EXTRA_INFLICTION")
+        self.assertTrue(symbol_data.claimed_talisman)
+        self.assertFalse(symbol_data.category_expanded)
+        self.assertEqual(str(symbol_data), "SymbolData(Selected Symbol: DIAMOND_MINING_HELIX, Bop Bonus: EXTRA_INFLICTION, Claimed Talisman: True, Category Expanded: False)")
+
+    def test_leveling_data(self):
+        """
+        Test LevelingData initialization and integration of all subcomponents.
+        """
+        leveling_data = LevelingData(self.sample_data)
+        
+        self.assertIsInstance(leveling_data.experience_data, ExperienceData)
+        self.assertEqual(leveling_data.experience_data.experience, 33493)
+
+        self.assertIsInstance(leveling_data.completions_data, CompletionsData)
+        self.assertEqual(leveling_data.completions_data.completions["NUCLEUS_RUNS"], 21)
+
+        self.assertIsInstance(leveling_data.task_data, TaskData)
+        self.assertEqual(len(leveling_data.task_data.completed_tasks), 2)
+
+        self.assertIsInstance(leveling_data.pet_score, PetScore)
+        self.assertEqual(leveling_data.pet_score.highest_pet_score, 356)
+
+        self.assertIsInstance(leveling_data.migration_data, MigrationData)
+        self.assertTrue(leveling_data.migration_data.migrated)
+
+        self.assertIsInstance(leveling_data.task_views, TaskViews)
+        self.assertEqual(len(leveling_data.task_views.last_viewed_tasks), 2)
+
+        self.assertIsInstance(leveling_data.event_stats, EventStats)
+        self.assertEqual(leveling_data.event_stats.mining_fiesta_ores_mined, 4220)
+
+        self.assertIsInstance(leveling_data.symbol_data, SymbolData)
+        self.assertEqual(leveling_data.symbol_data.selected_symbol, "DIAMOND_MINING_HELIX")
+
+        leveling_str = str(leveling_data)
+        self.assertIn("ExperienceData(Experience: 33493)", leveling_str)
+        self.assertIn("CompletionsData({'NUCLEUS_RUNS': 21})", leveling_str)
 
 if __name__ == '__main__':
     unittest.main()
