@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from .PlayerData import PlayerData
 from .GlacitePlayerData import GlacitePlayerData
 from .Events import Events
+from .GardenPlayerData import GardenPlayerData
+from .PetsData import PetsData
 
 class DeletionNotice:
     """
@@ -70,8 +72,8 @@ class SkyBlockProfileMember:
         self.player_data = PlayerData(data.get('player_data', {}))
         self.glacite_player_data = GlacitePlayerData(data.get('glacite_player_data', {}))
         self.events = Events(data.get('events', {}))
-        self.garden_player_data = data.get('garden_player_data', {})
-        self.pets_data = data.get('pets_data', {})
+        self.garden_player_data = GardenPlayerData(data.get('garden_player_data', {}))
+        self.pets_data = PetsData(data.get('pets_data', {}))
         self.accessory_bag_storage = data.get('accessory_bag_storage', {})
         self.leveling = data.get('leveling', {})
         self.item_data = data.get('item_data', {})
