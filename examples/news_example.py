@@ -1,4 +1,4 @@
-from hypixel_api_lib.News import SkyBlockNews 
+from hypixel_api_lib import SkyBlockNews 
 from dotenv import load_dotenv
 import os
 

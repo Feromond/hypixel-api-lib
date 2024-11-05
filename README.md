@@ -167,7 +167,7 @@ Here we will describe how to use `Hypixel-Api-Lib`, including examples of how to
 ### Fetching the Current Bingo Event
 
 ```Python
-from hypixel_api_lib.Bingo import BingoEvents
+from hypixel_api_lib import BingoEvents
 
 # Initialize the BingoEvents manager
 bingo_events = BingoEvents()
@@ -184,7 +184,7 @@ print(f"Modifier: {current_event.modifier}")
 ### Retrieving Item Information
 
 ```Python
-from hypixel_api_lib.Items import Items
+from hypixel_api_lib import Items
 
 # Initialize the Items manager
 items = Items()
