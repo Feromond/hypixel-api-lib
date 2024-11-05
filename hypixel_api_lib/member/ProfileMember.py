@@ -4,6 +4,7 @@ from .GlacitePlayerData import GlacitePlayerData
 from .Events import Events
 from .GardenPlayerData import GardenPlayerData
 from .PetsData import PetsData
+from .Rift import RiftData
 
 class DeletionNotice:
     """
@@ -68,7 +69,7 @@ class SkyBlockProfileMember:
 
     def __init__(self, uuid, data):
         self.uuid = uuid
-        self.rift = data.get('rift', {})
+        self.rift = RiftData(data.get('rift', {}))
         self.player_data = PlayerData(data.get('player_data', {}))
         self.glacite_player_data = GlacitePlayerData(data.get('glacite_player_data', {}))
         self.events = Events(data.get('events', {}))
