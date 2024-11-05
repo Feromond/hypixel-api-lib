@@ -4,7 +4,13 @@ import requests
 from datetime import datetime
 
 from hypixel_api_lib.Profiles import *
-from hypixel_api_lib.member import DeletionNotice
+from hypixel_api_lib.member.ProfileMember import *
+from hypixel_api_lib.member.PlayerData import *
+from hypixel_api_lib.member.GlacitePlayerData import *
+from hypixel_api_lib.member.Events import *
+from hypixel_api_lib.member.GardenPlayerData import *
+from hypixel_api_lib.member.PetsData import *
+
 
 class TestSkyBlockProfiles(unittest.TestCase):
     def setUp(self):
@@ -173,36 +179,6 @@ class TestSkyBlockProfiles(unittest.TestCase):
         self.assertEqual(banking.transactions[0].action, "DEPOSIT")
         self.assertEqual(banking.transactions[1].action, "WITHDRAW")
 
-    def test_deletion_notice(self):
-        """
-        Test the initialization of DeletionNotice.
-        """
-        sample_data = {
-            "timestamp": 1630000000000
-        }
-        deletion_notice = DeletionNotice(sample_data)
-        self.assertIsInstance(deletion_notice.timestamp, datetime)
-        self.assertEqual(deletion_notice.timestamp.timestamp(), 1630000000.0)
-
-    def test_skyblock_profile_member(self):
-        """
-        Test the initialization of SkyBlockProfileMember.
-        """
-        sample_data = {
-            "uuid": "uuid1",
-            "rift": {"rift_data": "some_data"},
-            "garden_player_data": {"some": "data"},
-            "profile": {},
-            "player_id": "player1"
-            # ... other data ...
-        }
-        member = SkyBlockProfileMember(uuid="uuid1", data=sample_data)
-        self.assertEqual(member.uuid, "uuid1")
-        # self.assertEqual(member.rift, {"rift_data": "some_data"})
-        # self.assertEqual(member.garden_player_data, {"some": "data"}) # Need to fix after re-doing these classes
-        self.assertEqual(member.player_id, "player1")
-        self.assertFalse(member.is_member_deleted())
-
     def test_skyblock_profile_methods(self):
         """
         Test methods in SkyBlockProfile class.
@@ -337,6 +313,474 @@ class TestSkyBlockProfiles(unittest.TestCase):
             profile = profiles_manager.get_profile(profile_id="some_profile_id")
 
         self.assertIn("No profile data available in the response", str(context.exception))
+
+class TestSkyBlockProfileMember(unittest.TestCase):
+    
+    """
+    TODO: This test needs to be fully remade eventually 
+    to properly test the member once all the sub components are completed
+    but for now it just exists to test deletion and some other small basic details.
+    """
+
+    def setUp(self):
+        self.sample_member_data = {
+            "uuid": "uuid1",
+            "rift": {"rift_data": "some_data"},
+            "profile": {
+                "deletion_notice": {"timestamp": 1630000000000}
+            },
+            "player_id": "player1"
+        }
+
+    def test_skyblock_profile_member_initialization(self):
+        """
+        Test the initialization of SkyBlockProfileMember.
+        """
+        member = SkyBlockProfileMember(uuid="uuid1", data=self.sample_member_data)
+        self.assertEqual(member.uuid, "uuid1")
+        self.assertEqual(member.player_id, "player1")
+
+    def test_deletion_notice(self):
+        """
+        Test the initialization of DeletionNotice in SkyBlockProfileMember.
+        """
+        member = SkyBlockProfileMember(uuid="uuid1", data=self.sample_member_data)
+        self.assertIsInstance(member.deleted_timestamp, DeletionNotice)
+        self.assertIsInstance(member.deleted_timestamp.timestamp, datetime)
+        self.assertEqual(member.deleted_timestamp.timestamp.timestamp(), 1630000000.0)
+
+    def test_is_member_deleted(self):
+        """
+        Test the is_member_deleted method in SkyBlockProfileMember.
+        """
+        member = SkyBlockProfileMember(uuid="uuid1", data=self.sample_member_data)
+        self.assertTrue(member.is_member_deleted())
+
+    def test_str_representation(self):
+        """
+        Test the string representation of SkyBlockProfileMember.
+        """
+        member = SkyBlockProfileMember(uuid="uuid1", data=self.sample_member_data)
+        self.assertIn("SkyBlockProfileMember UUID: uuid1", str(member))
+
+class TestPlayerData(unittest.TestCase):
+
+    def setUp(self):
+        self.sample_player_data = {
+            "visited_zones": ["zone1", "zone2", "zone3"],
+            "last_death": 1630000000000,
+            "perks": {
+                "strength": 5,
+                "agility": 3
+            },
+            "active_effects": ["speed", "strength"],
+            "paused_effects": ["regeneration"],
+            "temp_stat_buffs": ["extra_damage"],
+            "death_count": 10,
+            "disabled_potion_effects": ["poison"],
+            "achievement_spawned_island_types": ["main", "island"],
+            "visited_modes": ["hardcore", "normal"],
+            "unlocked_coll_tiers": ["tier1", "tier2"],
+            "crafted_generators": ["gen1", "gen2"],
+            "fastest_target_practice": 12.34,
+            "fishing_treasure_caught": 5,
+            "experience": {
+                "combat": 12345.67,
+                "mining": 9876.54
+            }
+        }
+
+    def test_player_data_initialization(self):
+        """
+        Test the initialization of PlayerData and its attributes.
+        """
+        player_data = PlayerData(self.sample_player_data)
+        
+        # Test basic attributes
+        self.assertEqual(player_data.visited_zones, ["zone1", "zone2", "zone3"])
+        self.assertEqual(player_data.death_count, 10)
+        self.assertEqual(player_data.active_effects, ["speed", "strength"])
+        self.assertEqual(player_data.paused_effects, ["regeneration"])
+        self.assertEqual(player_data.temp_stat_buffs, ["extra_damage"])
+        self.assertEqual(player_data.disabled_potion_effects, ["poison"])
+        self.assertEqual(player_data.achievement_spawned_island_types, ["main", "island"])
+        self.assertEqual(player_data.visited_modes, ["hardcore", "normal"])
+        self.assertEqual(player_data.unlocked_coll_tiers, ["tier1", "tier2"])
+        self.assertEqual(player_data.crafted_generators, ["gen1", "gen2"])
+        self.assertEqual(player_data.fastest_target_practice, 12.34)
+        self.assertEqual(player_data.fishing_treasure_caught, 5)
+
+    def test_last_death_timestamp_conversion(self):
+        """
+        Test conversion of last_death timestamp to datetime.
+        """
+        player_data = PlayerData(self.sample_player_data)
+        self.assertIsInstance(player_data.last_death, datetime)
+        self.assertEqual(player_data.last_death.timestamp(), 1630000000.0)
+
+    def test_perks_parsing(self):
+        """
+        Test parsing of perks into Perk objects.
+        """
+        player_data = PlayerData(self.sample_player_data)
+        self.assertEqual(len(player_data.perks), 2)
+        self.assertIsInstance(player_data.perks[0], Perk)
+        self.assertEqual(player_data.perks[0].name, "strength")
+        self.assertEqual(player_data.perks[0].level, 5)
+        self.assertEqual(player_data.perks[1].name, "agility")
+        self.assertEqual(player_data.perks[1].level, 3)
+
+    def test_experience_parsing(self):
+        """
+        Test parsing of experience into SkillExperience objects.
+        """
+        player_data = PlayerData(self.sample_player_data)
+        self.assertEqual(len(player_data.experience), 2)
+        self.assertIsInstance(player_data.experience[0], SkillExperience)
+        self.assertEqual(player_data.experience[0].skill_name, "combat")
+        self.assertEqual(player_data.experience[0].experience, 12345.67)
+        self.assertEqual(player_data.experience[1].skill_name, "mining")
+        self.assertEqual(player_data.experience[1].experience, 9876.54)
+
+    def test_str_representation(self):
+        """
+        Test the string representation of PlayerData.
+        """
+        player_data = PlayerData(self.sample_player_data)
+        player_data_str = str(player_data)
+        self.assertIn("PlayerData(Deaths: 10", player_data_str)
+        self.assertIn("Visited Zones: 3", player_data_str)
+        self.assertIn("Experience: [combat: 12345.67 XP", player_data_str)
+
+class TestGlacitePlayerData(unittest.TestCase):
+
+    def setUp(self):
+        self.sample_glacite_data = {
+            "fossils_donated": ["fossil1", "fossil2"],
+            "fossil_dust": 150.75,
+            "corpses_looted": {"zombie": 5, "skeleton": 3},
+            "mineshafts_entered": 12
+        }
+
+    def test_glacite_player_data_initialization(self):
+        """
+        Test the initialization of GlacitePlayerData and its attributes.
+        """
+        glacite_data = GlacitePlayerData(self.sample_glacite_data)
+        
+        self.assertEqual(glacite_data.fossils_donated, ["fossil1", "fossil2"])
+        self.assertEqual(glacite_data.fossil_dust, 150.75)
+        self.assertEqual(glacite_data.corpses_looted, {"zombie": 5, "skeleton": 3})
+        self.assertEqual(glacite_data.mineshafts_entered, 12)
+
+    def test_default_values(self):
+        """
+        Test that GlacitePlayerData uses default values when data is missing.
+        """
+        glacite_data = GlacitePlayerData({})
+        self.assertEqual(glacite_data.fossils_donated, [])
+        self.assertEqual(glacite_data.fossil_dust, 0.0)
+        self.assertEqual(glacite_data.corpses_looted, {})
+        self.assertEqual(glacite_data.mineshafts_entered, 0)
+
+    def test_str_representation(self):
+        """
+        Test the string representation of GlacitePlayerData.
+        """
+        glacite_data = GlacitePlayerData(self.sample_glacite_data)
+        glacite_data_str = str(glacite_data)
+        self.assertIn("Fossils Donated: ['fossil1', 'fossil2']", glacite_data_str)
+        self.assertIn("Fossil Dust: 150.75", glacite_data_str)
+        self.assertIn("Corpses Looted: {'zombie': 5, 'skeleton': 3}", glacite_data_str)
+        self.assertIn("Mineshafts Entered: 12", glacite_data_str)
+
+class TestEasterEvent(unittest.TestCase):
+
+    def setUp(self):
+        self.sample_easter_data = {
+            "chocolate": 100,
+            "chocolate_since_prestige": 50,
+            "total_chocolate": 150,
+            "rabbits": {
+                "collected_eggs": {"breakfast": 10, "lunch": 5},
+                "collected_locations": {"location1": 2, "location2": 3},
+                "rabbit1": 3,
+                "rabbit2": 5
+            },
+            "shop": {
+                "year": 2021,
+                "rabbits": ["rabbit1", "rabbit2"],
+                "rabbits_purchased": ["rabbit1"],
+                "chocolate_spent": 25,
+                "cocoa_fortune_upgrades": 2
+            },
+            "employees": {
+                "employee1": 3,
+                "employee2": 5
+            },
+            "last_viewed_chocolate_factory": 1630000000000,
+            "rabbit_barn_capacity_level": 4,
+            "chocolate_level": 10,
+            "time_tower": {
+                "charges": 3,
+                "activation_time": 1630000000000,
+                "level": 5,
+                "last_charge_time": 1630003600000
+            },
+            "rabbit_sort": "name",
+            "rabbit_filter": "active",
+            "el_dorado_progress": 80,
+            "chocolate_multiplier_upgrades": 3,
+            "click_upgrades": 4,
+            "rabbit_rarity_upgrades": 2
+        }
+
+    def test_easter_event_initialization(self):
+        """
+        Test initialization of EasterEvent and its attributes.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        
+        # Test basic attributes
+        self.assertEqual(easter_event.chocolate, 100)
+        self.assertEqual(easter_event.chocolate_since_prestige, 50)
+        self.assertEqual(easter_event.total_chocolate, 150)
+        self.assertEqual(easter_event.rabbit_barn_capacity_level, 4)
+        self.assertEqual(easter_event.chocolate_level, 10)
+        self.assertEqual(easter_event.rabbit_sort, "name")
+        self.assertEqual(easter_event.rabbit_filter, "active")
+        self.assertEqual(easter_event.el_dorado_progress, 80)
+        self.assertEqual(easter_event.chocolate_multiplier_upgrades, 3)
+        self.assertEqual(easter_event.click_upgrades, 4)
+        self.assertEqual(easter_event.rabbit_rarity_upgrades, 2)
+
+    def test_easter_time_tower_initialization(self):
+        """
+        Test initialization of EasterTimeTower within EasterEvent.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        time_tower = easter_event.time_tower
+        self.assertIsInstance(time_tower, EasterTimeTower)
+        self.assertEqual(time_tower.charges, 3)
+        self.assertEqual(time_tower.level, 5)
+        self.assertIsInstance(time_tower.activation_time, datetime)
+        self.assertEqual(time_tower.activation_time.timestamp(), 1630000000.0)
+        self.assertIsInstance(time_tower.last_charge_time, datetime)
+        self.assertEqual(time_tower.last_charge_time.timestamp(), 1630003600.0)
+
+    def test_easter_employees_initialization(self):
+        """
+        Test initialization of EasterEmployees within EasterEvent.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        employees = easter_event.employees
+        self.assertIsInstance(employees, EasterEmployees)
+        self.assertEqual(employees.employee_levels, {"employee1": 3, "employee2": 5})
+
+    def test_easter_shop_initialization(self):
+        """
+        Test initialization of EasterShop within EasterEvent.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        shop = easter_event.shop
+        self.assertIsInstance(shop, EasterShop)
+        self.assertEqual(shop.year, 2021)
+        self.assertEqual(shop.rabbits, ["rabbit1", "rabbit2"])
+        self.assertEqual(shop.rabbits_purchased, ["rabbit1"])
+        self.assertEqual(shop.chocolate_spent, 25)
+        self.assertEqual(shop.cocoa_fortune_upgrades, 2)
+
+    def test_easter_rabbits_data_initialization(self):
+        """
+        Test initialization of EasterRabbitsData within EasterEvent.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        rabbits_data = easter_event.rabbits_data
+        self.assertIsInstance(rabbits_data, EasterRabbitsData)
+        self.assertEqual(rabbits_data.collected_eggs, {"breakfast": 10, "lunch": 5})
+        self.assertEqual(rabbits_data.collected_locations, {"location1": 2, "location2": 3})
+        self.assertEqual(rabbits_data.rabbit_counts, {"rabbit1": 3, "rabbit2": 5})
+
+    def test_str_representation(self):
+        """
+        Test the string representation of the main components.
+        """
+        easter_event = EasterEvent(self.sample_easter_data)
+        event_str = str(easter_event)
+        self.assertIn("Chocolate: 100", event_str)
+        self.assertIn("Total Chocolate: 150", event_str)
+        self.assertIn("TimeTower:", event_str)
+        self.assertIn("RabbitsData:", event_str)
+        self.assertIn("Shop:", event_str)
+        self.assertIn("Employees:", event_str)
+
+class TestGardenPlayerData(unittest.TestCase):
+
+    def setUp(self):
+        self.sample_garden_data = {
+            "copper": 7961,
+            "larva_consumed": 5
+        }
+
+    def test_garden_player_data_initialization(self):
+        """
+        Test the initialization of GardenPlayerData and its attributes.
+        """
+        garden_data = GardenPlayerData(self.sample_garden_data)
+        
+        self.assertEqual(garden_data.copper, 7961)
+        self.assertEqual(garden_data.larva_consumed, 5)
+
+    def test_default_values(self):
+        """
+        Test that GardenPlayerData uses default values when data is missing.
+        """
+        garden_data = GardenPlayerData({})
+        self.assertEqual(garden_data.copper, 0)
+        self.assertEqual(garden_data.larva_consumed, 0)
+
+    def test_str_representation(self):
+        """
+        Test the string representation of GardenPlayerData.
+        """
+        garden_data = GardenPlayerData(self.sample_garden_data)
+        garden_data_str = str(garden_data)
+        self.assertIn("Copper: 7961", garden_data_str)
+        self.assertIn("Larva Consumed: 5", garden_data_str)
+
+class TestPetsData(unittest.TestCase):
+
+    def setUp(self):
+        self.sample_pets_data = {
+            "pet_care": {
+                "coins_spent": 89614810.07,
+                "pet_types_sacrificed": ["ENDERMAN", "BLACK_CAT"]
+            },
+            "autopet": {
+                "rules_limit": 16,
+                "rules": [
+                    {
+                        "uuid": "rule1",
+                        "id": "EQUIP_WARDROBE_SLOT",
+                        "name": "Equip Golden Dragon",
+                        "uniqueId": "unique_rule_id1",
+                        "exceptions": [{"id": "IS_IN_ISLAND", "data": {"island": "mining_3"}}],
+                        "disabled": False,
+                        "data": {"slot": "4"}
+                    }
+                ],
+                "migrated": True,
+                "migrated_2": False
+            },
+            "pets": [
+                {
+                    "uuid": "pet1",
+                    "uniqueId": "unique_pet_id1",
+                    "type": "SILVERFISH",
+                    "exp": 45163824.71,
+                    "active": False,
+                    "tier": "LEGENDARY",
+                    "heldItem": "PET_ITEM_MINING_SKILL_BOOST_RARE",
+                    "candyUsed": 0,
+                    "skin": None
+                },
+                {
+                    "uuid": "pet2",
+                    "uniqueId": "unique_pet_id2",
+                    "type": "BEE",
+                    "exp": 5297.31,
+                    "active": True,
+                    "tier": "RARE",
+                    "heldItem": None,
+                    "candyUsed": 2,
+                    "skin": "BEE_SKIN"
+                }
+            ]
+        }
+
+    def test_pet_care_data_initialization(self):
+        """
+        Test initialization of PetCareData.
+        """
+        pet_care_data = PetCareData(self.sample_pets_data["pet_care"])
+        self.assertEqual(pet_care_data.coins_spent, 89614810.07)
+        self.assertEqual(pet_care_data.pet_types_sacrificed, ["ENDERMAN", "BLACK_CAT"])
+
+    def test_auto_pet_data_initialization(self):
+        """
+        Test initialization of AutoPetData.
+        """
+        autopet_data = AutoPetData(self.sample_pets_data["autopet"])
+        self.assertEqual(autopet_data.rules_limit, 16)
+        self.assertEqual(len(autopet_data.rules), 1)
+        self.assertTrue(autopet_data.migrated)
+        self.assertFalse(autopet_data.migrated_2)
+
+        # Test the single rule within AutoPetData
+        rule = autopet_data.rules[0]
+        self.assertIsInstance(rule, AutoPetRule)
+        self.assertEqual(rule.uuid, "rule1")
+        self.assertEqual(rule.rule_id, "EQUIP_WARDROBE_SLOT")
+        self.assertEqual(rule.name, "Equip Golden Dragon")
+        self.assertEqual(rule.data, {"slot": "4"})
+        self.assertFalse(rule.disabled)
+        self.assertEqual(rule.exceptions[0]["id"], "IS_IN_ISLAND")
+
+    def test_pet_data_initialization(self):
+        """
+        Test initialization of individual PetData objects.
+        """
+        pets = [PetData(pet) for pet in self.sample_pets_data["pets"]]
+        self.assertEqual(len(pets), 2)
+
+        pet1 = pets[0]
+        self.assertEqual(pet1.uuid, "pet1")
+        self.assertEqual(pet1.type, "SILVERFISH")
+        self.assertEqual(pet1.experience, 45163824.71)
+        self.assertFalse(pet1.active)
+        self.assertEqual(pet1.tier, "LEGENDARY")
+        self.assertEqual(pet1.held_item, "PET_ITEM_MINING_SKILL_BOOST_RARE")
+        self.assertEqual(pet1.candy_used, 0)
+        self.assertIsNone(pet1.skin)
+
+        pet2 = pets[1]
+        self.assertEqual(pet2.uuid, "pet2")
+        self.assertEqual(pet2.type, "BEE")
+        self.assertEqual(pet2.experience, 5297.31)
+        self.assertTrue(pet2.active)
+        self.assertEqual(pet2.tier, "RARE")
+        self.assertEqual(pet2.candy_used, 2)
+        self.assertEqual(pet2.skin, "BEE_SKIN")
+
+    def test_pets_data_initialization(self):
+        """
+        Test initialization of PetsData and its components.
+        """
+        pets_data = PetsData(self.sample_pets_data)
+        
+        self.assertIsInstance(pets_data.pet_care, PetCareData)
+        self.assertEqual(pets_data.pet_care.coins_spent, 89614810.07)
+        
+        self.assertIsInstance(pets_data.autopet, AutoPetData)
+        self.assertEqual(pets_data.autopet.rules_limit, 16)
+        self.assertTrue(pets_data.autopet.migrated)
+
+        self.assertEqual(len(pets_data.pets), 2)
+        self.assertIsInstance(pets_data.pets[0], PetData)
+        self.assertEqual(pets_data.pets[0].type, "SILVERFISH")
+        self.assertEqual(pets_data.pets[1].type, "BEE")
+
+    def test_str_representation(self):
+        """
+        Test the string representation of PetsData.
+        """
+        pets_data = PetsData(self.sample_pets_data)
+        pets_data_str = str(pets_data)
+        self.assertIn("Pet Care:", pets_data_str)
+        self.assertIn("AutoPet Rules: 1", pets_data_str)
+        self.assertIn("Total Pets: 2", pets_data_str)
+
+
 
 if __name__ == '__main__':
     unittest.main()
