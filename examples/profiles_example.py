@@ -1,4 +1,4 @@
-from hypixel_api_lib.Profiles import SkyBlockProfiles
+from hypixel_api_lib import SkyBlockProfiles
 import os
 from dotenv import load_dotenv
 
