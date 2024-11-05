@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 
 from hypixel_api_lib.Profiles import *
+from hypixel_api_lib.member import DeletionNotice
 
 class TestSkyBlockProfiles(unittest.TestCase):
     def setUp(self):
