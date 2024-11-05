@@ -2,6 +2,10 @@ import unittest
 from unittest.mock import patch
 import requests
 from datetime import datetime
+import base64
+import zlib
+from io import BytesIO
+import gzip
 
 from hypixel_api_lib.Profiles import *
 from hypixel_api_lib.member.ProfileMember import *
@@ -10,6 +14,7 @@ from hypixel_api_lib.member.GlacitePlayerData import *
 from hypixel_api_lib.member.Events import *
 from hypixel_api_lib.member.GardenPlayerData import *
 from hypixel_api_lib.member.PetsData import *
+from hypixel_api_lib.member.Rift import *
 
 
 class TestSkyBlockProfiles(unittest.TestCase):
@@ -779,6 +784,93 @@ class TestPetsData(unittest.TestCase):
         self.assertIn("Pet Care:", pets_data_str)
         self.assertIn("AutoPet Rules: 1", pets_data_str)
         self.assertIn("Total Pets: 2", pets_data_str)
+
+class TestRiftData(unittest.TestCase):
+    def setUp(self):
+        self.sample_data = {
+            'type': 0,
+            'data': base64.b64encode(zlib.compress(b'This is a test of the inventory data handling.')).decode('utf-8')
+        }
+        self.sample_gzip_data = {
+            'type': 0,
+            'data': base64.b64encode(gzip.compress(b'This is a gzip compressed test')).decode('utf-8')
+        }
+        self.invalid_data = {
+            'type': 0,
+            'data': "InvalidData!"
+        }
+        self.empty_data = {
+            'type': 0,
+            'data': ""
+        }
+        self.sample_rift_data = {
+            'village_plaza': {'murder': {}, 'cowboy': {}},
+            'wither_cage': {'killed_eyes': ['wizard_tower']},
+            'black_lagoon': {'talked_to_edwin': True},
+            'dead_cats': {'found_cats': ['first', 'second'], 'unlocked_pet': True},
+            'wizard_tower': {'wizard_quest_step': 3},
+            'enigma': {'bought_cloak': True, 'found_souls': ['RIFT_1']},
+            'gallery': {'elise_step': 5, 'sent_trophy_dialogues': ['dialogue_1']},
+            'west_village': {'crazy_kloon': {'talked': True}},
+            'wyld_woods': {'talked_threebrothers': ['brother_1']},
+            'inventory': {'inv_contents': self.sample_data},
+            'ender_chest_contents': self.invalid_data,
+            'ender_chest_page_icons': [],
+            'equipment_contents': self.sample_gzip_data,
+        }
+    
+    def test_valid_zlib_data(self):
+        """Test InventoryData with valid zlib-compressed, base64-encoded data."""
+        inventory_data = InventoryData(self.sample_data)
+        self.assertEqual(inventory_data.data, "This is a test of the inventory data handling.")
+
+    def test_valid_gzip_data(self):
+        """Test InventoryData with valid gzip-compressed, base64-encoded data."""
+        inventory_data = InventoryData(self.sample_gzip_data)
+        self.assertEqual(inventory_data.data, "This is a gzip compressed test")
+
+    def test_invalid_data(self):
+        """Test InventoryData with invalid base64 data."""
+        inventory_data = InventoryData(self.invalid_data)
+        self.assertIn("Error decoding inventory", inventory_data.data)
+
+    def test_empty_data(self):
+        """Test InventoryData with no data."""
+        inventory_data = InventoryData(self.empty_data)
+        self.assertEqual(inventory_data.data, "No data available")
+
+    def test_str_representation(self):
+        """Test string representation of InventoryData for valid and error cases."""
+        inventory_data = InventoryData(self.sample_data)
+        self.assertIn("InventoryData(Type: 0, Data Preview: This is a test", str(inventory_data))
+
+        error_inventory_data = InventoryData(self.invalid_data)
+        self.assertIn("Error decoding inventory", str(error_inventory_data))
+
+    def test_riftdata_initialization(self):
+        """Test that RiftData and its components initialize correctly."""
+        rift_data = RiftData(self.sample_rift_data)
+        self.assertIsInstance(rift_data.village_plaza, VillagePlaza)
+        self.assertIsInstance(rift_data.wither_cage, WitherCage)
+        self.assertIsInstance(rift_data.inventory, InventoryData)
+        self.assertIsInstance(rift_data.ender_chest_contents, InventoryData)
+        self.assertEqual(rift_data.wither_cage.killed_eyes, ['wizard_tower'])
+        self.assertTrue(rift_data.black_lagoon.talked_to_edwin)
+
+    def test_inventory_data_in_rift(self):
+        """Test that RiftData processes inventory data within nested InventoryData instances."""
+        rift_data = RiftData(self.sample_rift_data)
+        self.assertEqual(rift_data.inventory.data, "This is a test of the inventory data handling.")
+        self.assertIn("Error decoding inventory", rift_data.ender_chest_contents.data)
+        self.assertEqual(rift_data.equipment_contents.data, "This is a gzip compressed test")
+
+    def test_riftdata_str_representation(self):
+        """Test string representation of RiftData."""
+        rift_data = RiftData(self.sample_rift_data)
+        output = str(rift_data)
+        self.assertIn("Village Plaza: VillagePlaza(Murder:", output)
+        self.assertIn("Inventory: InventoryData(Type: 0,", output)
+        self.assertIn("Ender Chest Page Icons: []", output)
 
 
 
