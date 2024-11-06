@@ -7,7 +7,9 @@ from .PetsData import PetsData
 from .Rift import RiftData
 from .AccessoryBagStorage import AccessoryBagStorage
 from .Leveling import LevelingData
-
+from .ItemData import ItemData
+from .JacobsContest import JacobsContestData
+from .Currencies import Currencies
 
 class DeletionNotice:
     """
@@ -80,9 +82,9 @@ class SkyBlockProfileMember:
         self.pets_data = PetsData(data.get('pets_data', {}))
         self.accessory_bag_storage = AccessoryBagStorage(data.get('accessory_bag_storage', {}))
         self.leveling = LevelingData(data.get('leveling', {}))
-        self.item_data = data.get('item_data', {})
-        self.jacobs_contest = data.get('jacobs_contest', {})
-        self.currencies = data.get('currencies', {})
+        self.item_data = ItemData(data.get('item_data', {}))
+        self.jacobs_contest = JacobsContestData(data.get('jacobs_contest', {}))
+        self.currencies = Currencies(data.get('currencies', {}))
         self.dungeons = data.get('dungeons', {})
         self.profile = data.get('profile', {})
         self.deleted_member = self.is_member_deleted()
