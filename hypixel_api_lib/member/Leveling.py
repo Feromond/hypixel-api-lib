@@ -5,10 +5,10 @@ class ExperienceData:
     Attributes:
         experience (int): The player's total experience points.
     """
-    def __init__(self, experience):
-        self.experience = experience
+    def __init__(self, experience: int) -> None:
+        self.experience: int = experience
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ExperienceData(Experience: {self.experience})"
 
 
@@ -19,10 +19,10 @@ class CompletionsData:
     Attributes:
         completions (dict): Dictionary mapping completion types to their values.
     """
-    def __init__(self, completions):
+    def __init__(self, completions: dict) -> None:
         self.completions = completions
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"CompletionsData({self.completions})"
 
 
@@ -33,10 +33,10 @@ class TaskData:
     Attributes:
         completed_tasks (list): List of strings representing completed tasks.
     """
-    def __init__(self, completed_tasks):
-        self.completed_tasks = completed_tasks
+    def __init__(self, completed_tasks: list[str]) -> None:
+        self.completed_tasks: list[str] = completed_tasks
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"TaskData(Completed Tasks: {len(self.completed_tasks)})"
 
 
@@ -47,10 +47,10 @@ class PetScore:
     Attributes:
         highest_pet_score (int): The highest score the player has achieved with pets.
     """
-    def __init__(self, highest_pet_score):
-        self.highest_pet_score = highest_pet_score
+    def __init__(self, highest_pet_score: int) -> None:
+        self.highest_pet_score: int = highest_pet_score
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"PetScore(Highest Pet Score: {self.highest_pet_score})"
 
 
@@ -62,11 +62,11 @@ class MigrationData:
         migrated (bool): Indicates if the player data was migrated.
         migrated_completions_2 (bool): Indicates if the second phase of migration is complete.
     """
-    def __init__(self, migrated, migrated_completions_2):
-        self.migrated = migrated
-        self.migrated_completions_2 = migrated_completions_2
+    def __init__(self, migrated: bool, migrated_completions_2: bool) -> None:
+        self.migrated: bool = migrated
+        self.migrated_completions_2: bool = migrated_completions_2
 
-    def __str__(self):
+    def __str__(self) -> None:
         return f"MigrationData(Migrated: {self.migrated}, Migrated Completions 2: {self.migrated_completions_2})"
 
 
@@ -77,10 +77,10 @@ class TaskViews:
     Attributes:
         last_viewed_tasks (list): List of strings representing recently viewed tasks.
     """
-    def __init__(self, last_viewed_tasks):
-        self.last_viewed_tasks = last_viewed_tasks
+    def __init__(self, last_viewed_tasks: list[str]) -> None:
+        self.last_viewed_tasks: list[str] = last_viewed_tasks
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"TaskViews(Last Viewed Tasks: {self.last_viewed_tasks})"
 
 
@@ -92,11 +92,11 @@ class EventStats:
         fishing_festival_sharks_killed (int): Number of sharks killed during the fishing festival.
         mining_fiesta_ores_mined (int): Number of ores mined during the mining fiesta.
     """
-    def __init__(self, fishing_festival_sharks_killed, mining_fiesta_ores_mined):
-        self.fishing_festival_sharks_killed = fishing_festival_sharks_killed
-        self.mining_fiesta_ores_mined = mining_fiesta_ores_mined
+    def __init__(self, fishing_festival_sharks_killed: int, mining_fiesta_ores_mined: int) -> None:
+        self.fishing_festival_sharks_killed: int = fishing_festival_sharks_killed
+        self.mining_fiesta_ores_mined: int = mining_fiesta_ores_mined
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EventStats(Fishing Festival Sharks Killed: {self.fishing_festival_sharks_killed}, "
                 f"Mining Fiesta Ores Mined: {self.mining_fiesta_ores_mined})")
 
@@ -111,13 +111,13 @@ class SymbolData:
         claimed_talisman (bool): Indicates if the player has claimed the talisman.
         category_expanded (bool): Indicates if the player's category is expanded.
     """
-    def __init__(self, selected_symbol, bop_bonus, claimed_talisman, category_expanded):
-        self.selected_symbol = selected_symbol
-        self.bop_bonus = bop_bonus
-        self.claimed_talisman = claimed_talisman
-        self.category_expanded = category_expanded
+    def __init__(self, selected_symbol: str, bop_bonus: str, claimed_talisman: bool, category_expanded: bool) -> None:
+        self.selected_symbol: str = selected_symbol
+        self.bop_bonus: str = bop_bonus
+        self.claimed_talisman: bool = claimed_talisman
+        self.category_expanded: bool = category_expanded
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"SymbolData(Selected Symbol: {self.selected_symbol}, Bop Bonus: {self.bop_bonus}, "
                 f"Claimed Talisman: {self.claimed_talisman}, Category Expanded: {self.category_expanded})")
 
@@ -137,18 +137,18 @@ class LevelingData:
         symbol_data (SymbolData): Stores selected symbol, bonus, and other related attributes.
     """
 
-    def __init__(self, data):
-        self.experience_data = ExperienceData(data.get('experience', 0))
-        self.completions_data = CompletionsData(data.get('completions', {}))
-        self.task_data = TaskData(data.get('completed_tasks', []))
-        self.pet_score = PetScore(data.get('highest_pet_score', 0))
-        self.migration_data = MigrationData(data.get('migrated', False), data.get('migrated_completions_2', False))
-        self.task_views = TaskViews(data.get('last_viewed_tasks', []))
-        self.event_stats = EventStats(data.get('fishing_festival_sharks_killed', 0), data.get('mining_fiesta_ores_mined', 0))
-        self.symbol_data = SymbolData(data.get('selected_symbol', ''), data.get('bop_bonus', ''),
+    def __init__(self, data: dict) -> None:
+        self.experience_data: ExperienceData = ExperienceData(data.get('experience', 0))
+        self.completions_data: CompletionsData = CompletionsData(data.get('completions', {}))
+        self.task_data: TaskData = TaskData(data.get('completed_tasks', []))
+        self.pet_score: PetScore = PetScore(data.get('highest_pet_score', 0))
+        self.migration_data: MigrationData = MigrationData(data.get('migrated', False), data.get('migrated_completions_2', False))
+        self.task_views: TaskViews = TaskViews(data.get('last_viewed_tasks', []))
+        self.event_stats: EventStats = EventStats(data.get('fishing_festival_sharks_killed', 0), data.get('mining_fiesta_ores_mined', 0))
+        self.symbol_data: SymbolData = SymbolData(data.get('selected_symbol', ''), data.get('bop_bonus', ''),
                                       data.get('claimed_talisman', False), data.get('category_expanded', False))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"LevelingData(\n"
                 f"  {self.experience_data},\n"
                 f"  {self.completions_data},\n"
