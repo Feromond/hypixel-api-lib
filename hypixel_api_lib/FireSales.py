@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import requests
 
 FIRE_SALES_API_URL = "https://api.hypixel.net/skyblock/firesales"
@@ -15,20 +15,20 @@ class FireSaleItem:
         price (int): The price in Gems for this sale.
     """
 
-    def __init__(self, sale_data):
-        self.item_id = sale_data.get('item_id')
-        self.start = self._convert_timestamp(sale_data.get('start'))
-        self.end = self._convert_timestamp(sale_data.get('end'))
-        self.amount = sale_data.get('amount')
-        self.price = sale_data.get('price')
+    def __init__(self, sale_data: dict) -> None:
+        self.item_id: str = sale_data.get('item_id')
+        self.start: datetime | None = self._convert_timestamp(sale_data.get('start'))
+        self.end: datetime | None = self._convert_timestamp(sale_data.get('end'))
+        self.amount: int = sale_data.get('amount')
+        self.price: int = sale_data.get('price')
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def is_active(self):
+    def is_active(self) -> bool:
         """
         Check if the fire sale is currently active.
 
@@ -40,7 +40,7 @@ class FireSaleItem:
             return False
         return self.start <= now <= self.end
 
-    def time_until_start(self):
+    def time_until_start(self) -> timedelta | None:
         """
         Get the time remaining until the sale starts.
 
@@ -55,7 +55,7 @@ class FireSaleItem:
         else:
             return None
 
-    def time_until_end(self):
+    def time_until_end(self) -> timedelta | None:
         """
         Get the time remaining until the sale ends.
 
@@ -72,7 +72,7 @@ class FireSaleItem:
         else:
             return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         start_str = self.start.strftime("%Y-%m-%d %H:%M:%S %Z") if self.start else "N/A"
         end_str = self.end.strftime("%Y-%m-%d %H:%M:%S %Z") if self.end else "N/A"
         return (f"Fire Sale Item '{self.item_id}': Starts at {start_str}, Ends at {end_str}, "
@@ -87,11 +87,11 @@ class FireSales:
         sales (list of FireSaleItem): List of active or upcoming fire sales.
     """
 
-    def __init__(self, api_endpoint=FIRE_SALES_API_URL):
-        self._api_endpoint = api_endpoint
-        self.sales = self._get_fire_sales()
+    def __init__(self, api_endpoint: str = FIRE_SALES_API_URL) -> None:
+        self._api_endpoint: str = api_endpoint
+        self.sales: list[FireSaleItem] = self._get_fire_sales()
 
-    def _get_fire_sales(self):
+    def _get_fire_sales(self) -> list[FireSaleItem]:
         """
         Fetch the active or upcoming fire sales.
 
@@ -112,7 +112,7 @@ class FireSales:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching fire sales: {e}")
 
-    def get_sale_by_item_id(self, item_id):
+    def get_sale_by_item_id(self, item_id: str) -> FireSaleItem | None:
         """
         Retrieve a fire sale by its item ID.
 
@@ -124,7 +124,7 @@ class FireSales:
         """
         return next((sale for sale in self.sales if sale.item_id == item_id), None)
 
-    def get_active_sales(self):
+    def get_active_sales(self) -> list[FireSaleItem]:
         """
         Get all currently active fire sales.
 
@@ -133,7 +133,7 @@ class FireSales:
         """
         return [sale for sale in self.sales if sale.is_active()]
 
-    def get_upcoming_sales(self):
+    def get_upcoming_sales(self) -> list[FireSaleItem]:
         """
         Get all upcoming fire sales that have not started yet.
 
@@ -143,5 +143,5 @@ class FireSales:
         now = datetime.now(timezone.utc)
         return [sale for sale in self.sales if sale.start > now]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"FireSales with {len(self.sales)} active/upcoming sales"
