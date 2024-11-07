@@ -58,7 +58,7 @@ class PlayerData:
         experience (dict of str to float): Experience in various skills.
     """
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict) -> None:
         self.visited_zones: list = data.get('visited_zones', [])
         self.last_death: datetime | None = self._convert_timestamp(data.get('last_death'))
         self.perks: dict[str:int] = self._parse_perks(data.get('perks', {}))
