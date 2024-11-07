@@ -19,22 +19,22 @@ class DeletionNotice:
         timestamp (datetime): The timestamp when the deletion notice was issued.
     """
 
-    def __init__(self, data):
-        self.timestamp = self._convert_timestamp(data.get('timestamp'))
+    def __init__(self, data: dict) -> None:
+        self.timestamp: datetime | None = self._convert_timestamp(data.get('timestamp'))
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
         return f"Deletion Notice at {timestamp_str}"
 
 
-
+# TODO: Finish profile members and develop all the sub field data classes for them still. (last updated before dungeons)
 class SkyBlockProfileMember:
     """
     Represents a member of a SkyBlock profile.
@@ -72,45 +72,45 @@ class SkyBlockProfileMember:
         collection (dict): Collection data.
     """
 
-    def __init__(self, uuid, data):
-        self.uuid = uuid
-        self.rift = RiftData(data.get('rift', {}))
-        self.player_data = PlayerData(data.get('player_data', {}))
-        self.glacite_player_data = GlacitePlayerData(data.get('glacite_player_data', {}))
-        self.events = Events(data.get('events', {}))
-        self.garden_player_data = GardenPlayerData(data.get('garden_player_data', {}))
-        self.pets_data = PetsData(data.get('pets_data', {}))
-        self.accessory_bag_storage = AccessoryBagStorage(data.get('accessory_bag_storage', {}))
-        self.leveling = LevelingData(data.get('leveling', {}))
-        self.item_data = ItemData(data.get('item_data', {}))
-        self.jacobs_contest = JacobsContestData(data.get('jacobs_contest', {}))
-        self.currencies = Currencies(data.get('currencies', {}))
-        self.dungeons = data.get('dungeons', {})
-        self.profile = data.get('profile', {})
-        self.deleted_member = self.is_member_deleted()
-        self.deleted_timestamp = DeletionNotice(self.profile.get("deletion_notice")) if self.deleted_member else None
-        self.player_id = data.get('player_id')
-        self.nether_island_player_data = data.get('nether_island_player_data', {})
-        self.experimentation = data.get('experimentation', {})
-        self.mining_core = data.get('mining_core', {})
-        self.bestiary = data.get('bestiary', {})
-        self.quests = data.get('quests', {})
-        self.player_stats = data.get('player_stats', {})
-        self.winter_player_data = data.get('winter_player_data', {})
-        self.forge = data.get('forge', {})
-        self.fairy_soul = data.get('fairy_soul', {})
-        self.slayer = data.get('slayer', {})
-        self.trophy_fish = data.get('trophy_fish', {})
-        self.objectives = data.get('objectives', {})
-        self.inventory = data.get('inventory', {})
-        self.shared_inventory = data.get('shared_inventory', {})
-        self.collection = data.get('collection', {})
+    def __init__(self, uuid: str, data: dict) -> None:
+        self.uuid: str = uuid
+        self.rift: RiftData = RiftData(data.get('rift', {}))
+        self.player_data: PlayerData = PlayerData(data.get('player_data', {}))
+        self.glacite_player_data: GlacitePlayerData = GlacitePlayerData(data.get('glacite_player_data', {}))
+        self.events: Events = Events(data.get('events', {}))
+        self.garden_player_data: GardenPlayerData = GardenPlayerData(data.get('garden_player_data', {}))
+        self.pets_data: PetsData = PetsData(data.get('pets_data', {}))
+        self.accessory_bag_storage: AccessoryBagStorage = AccessoryBagStorage(data.get('accessory_bag_storage', {}))
+        self.leveling: LevelingData = LevelingData(data.get('leveling', {}))
+        self.item_data: ItemData = ItemData(data.get('item_data', {}))
+        self.jacobs_contest: JacobsContestData = JacobsContestData(data.get('jacobs_contest', {}))
+        self.currencies: Currencies = Currencies(data.get('currencies', {}))
+        self.dungeons: dict = data.get('dungeons', {})
+        self.profile: dict = data.get('profile', {})
+        self.deleted_member: bool = self.is_member_deleted()
+        self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.get("deletion_notice")) if self.deleted_member else None
+        self.player_id: str = data.get('player_id')
+        self.nether_island_player_data: dict = data.get('nether_island_player_data', {})
+        self.experimentation: dict = data.get('experimentation', {})
+        self.mining_core: dict = data.get('mining_core', {})
+        self.bestiary: dict = data.get('bestiary', {})
+        self.quests: dict = data.get('quests', {})
+        self.player_stats: dict = data.get('player_stats', {})
+        self.winter_player_data: dict = data.get('winter_player_data', {})
+        self.forge: dict = data.get('forge', {})
+        self.fairy_soul: dict = data.get('fairy_soul', {})
+        self.slayer: dict = data.get('slayer', {})
+        self.trophy_fish: dict = data.get('trophy_fish', {})
+        self.objectives: dict = data.get('objectives', {})
+        self.inventory: dict = data.get('inventory', {})
+        self.shared_inventory: dict = data.get('shared_inventory', {})
+        self.collection: dict = data.get('collection', {})
 
-    def is_member_deleted(self):
+    def is_member_deleted(self) -> bool:
         """Check if the current member has been marked as deleted in this profile"""
         if self.profile.get("deletion_notice"):
             return True
         return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"SkyBlockProfileMember UUID: {self.uuid}"
