@@ -20,23 +20,23 @@ class CommunityUpgradeState:
         fasttracked (bool): Whether the upgrade was fast-tracked.
     """
 
-    def __init__(self, data):
-        self.upgrade = data.get('upgrade')
-        self.tier = data.get('tier')
-        self.started_ms = self._convert_timestamp(data.get('started_ms'))
-        self.started_by = data.get('started_by')
-        self.claimed_ms = self._convert_timestamp(data.get('claimed_ms'))
-        self.claimed_by = data.get('claimed_by')
-        self.fasttracked = data.get('fasttracked', False)
+    def __init__(self, data: dict) -> None:
+        self.upgrade: str = data.get('upgrade')
+        self.tier: int = data.get('tier')
+        self.started_ms: datetime | None = self._convert_timestamp(data.get('started_ms'))
+        self.started_by: str = data.get('started_by')
+        self.claimed_ms: datetime | None = self._convert_timestamp(data.get('claimed_ms'))
+        self.claimed_by: str = data.get('claimed_by')
+        self.fasttracked: bool = data.get('fasttracked', False)
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Upgrade: {self.upgrade}, Tier: {self.tier}, Fasttracked: {self.fasttracked}"
 
 
@@ -49,16 +49,16 @@ class CommunityUpgrades:
         upgrade_states (list of CommunityUpgradeState): A list of completed upgrades.
     """
 
-    def __init__(self, data):
-        currently_upgrading_data = data.get('currently_upgrading')
-        self.currently_upgrading = (
+    def __init__(self, data: dict) -> None:
+        currently_upgrading_data: dict = data.get('currently_upgrading')
+        self.currently_upgrading: CommunityUpgradeState | None = (
             CommunityUpgradeState(currently_upgrading_data) if currently_upgrading_data else None
         )
-        self.upgrade_states = [
+        self.upgrade_states: list[CommunityUpgradeState] = [
             CommunityUpgradeState(upgrade_data) for upgrade_data in data.get('upgrade_states', [])
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         upgrading = str(self.currently_upgrading) if self.currently_upgrading else "None"
         return f"Community Upgrades (Currently Upgrading: {upgrading})"
 
@@ -74,20 +74,20 @@ class BankTransaction:
         amount (float): The amount of the transaction.
     """
 
-    def __init__(self, data):
-        self.timestamp = self._convert_timestamp(data.get('timestamp'))
-        self.action = data.get('action')
-        self.initiator_name = data.get('initiator_name')
-        self.amount = data.get('amount')
+    def __init__(self, data: dict) -> None:
+        self.timestamp: datetime | None = self._convert_timestamp(data.get('timestamp'))
+        self.action: str = data.get('action')
+        self.initiator_name: str = data.get('initiator_name')
+        self.amount: float = data.get('amount')
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
         return f"{self.action} of {self.amount} by {self.initiator_name} at {timestamp_str}"
 
@@ -101,11 +101,11 @@ class Banking:
         transactions (list of BankTransaction): A list of bank transactions.
     """
 
-    def __init__(self, data):
-        self.balance = data.get('balance', 0.0)
-        self.transactions = [BankTransaction(txn) for txn in data.get('transactions', [])]
+    def __init__(self, data: dict) -> None:
+        self.balance: float = data.get('balance', 0.0)
+        self.transactions: list[BankTransaction] = [BankTransaction(txn) for txn in data.get('transactions', [])]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Banking Balance: {self.balance}, Transactions: {len(self.transactions)}"
 
 
@@ -123,26 +123,26 @@ class SkyBlockProfile:
         game_mode (str): The game mode of the profile ('ironman', 'island', 'bingo', or 'Normal').
     """
 
-    def __init__(self, data):
-        self.profile_id = data.get('profile_id')
-        self.members = {}
-        members_data = data.get('members', {})
+    def __init__(self, data: dict) -> None:
+        self.profile_id: str = data.get('profile_id')
+        self.members: dict[str,SkyBlockProfileMember] = {}
+        members_data: dict = data.get('members', {})
         for uuid, member_data in members_data.items():
             self.members[uuid] = SkyBlockProfileMember(uuid, member_data)
 
-        self.community_upgrades = None
+        self.community_upgrades: CommunityUpgrades | None = None
         if 'community_upgrades' in data:
             self.community_upgrades = CommunityUpgrades(data['community_upgrades'])
 
-        self.banking = None
+        self.banking: Banking | None = None
         if 'banking' in data:
             self.banking = Banking(data['banking'])
 
-        self.cute_name = data.get('cute_name', None)
-        self.selected = data.get('selected', None)
-        self.game_mode = data.get('game_mode', "Normal")
+        self.cute_name: str | None = data.get('cute_name', None)
+        self.selected: bool | None = data.get('selected', None)
+        self.game_mode: str = data.get('game_mode', "Normal")
 
-    def get_member(self, uuid):
+    def get_member(self, uuid: str) -> SkyBlockProfileMember | None:
         """
         Retrieve a member by UUID.
 
@@ -154,7 +154,7 @@ class SkyBlockProfile:
         """
         return self.members.get(uuid)
 
-    def list_member_uuids(self):
+    def list_member_uuids(self) -> list[str]:
         """
         List all member UUIDs in the profile.
 
@@ -163,7 +163,7 @@ class SkyBlockProfile:
         """
         return list(self.members.keys())
 
-    def __str__(self):
+    def __str__(self) -> str:
         cute_name_str = f", Cute Name: {self.cute_name}" if self.cute_name else ""
         selected_str = ", Selected" if self.selected else ""
         game_mode_str = f", Game Mode: {self.game_mode}" if self.game_mode else ""
@@ -178,12 +178,12 @@ class SkyBlockProfiles:
         api_key (str): The API key required for the requests.
     """
 
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self._profile_endpoint = PROFILE_API_URL
-        self._profiles_endpoint = PROFILES_API_URL
+    def __init__(self, api_key: str) -> None:
+        self.api_key: str = api_key
+        self._profile_endpoint: str = PROFILE_API_URL
+        self._profiles_endpoint: str = PROFILES_API_URL
 
-    def get_profile(self, profile_id):
+    def get_profile(self, profile_id: str) -> SkyBlockProfile:
         """
         Fetches a single profile by profile ID using the profile endpoint.
 
@@ -222,7 +222,7 @@ class SkyBlockProfiles:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching the profile: {e}")
 
-    def get_profiles_by_player_uuid(self, player_uuid):
+    def get_profiles_by_player_uuid(self, player_uuid: str) -> list[SkyBlockProfile]:
         """
         Fetches all profiles associated with a player UUID using the profiles endpoint.
 
@@ -260,7 +260,7 @@ class SkyBlockProfiles:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching the profiles: {e}")
 
-    def get_selected_profile_by_player_uuid(self, player_uuid):
+    def get_selected_profile_by_player_uuid(self, player_uuid: str) -> SkyBlockProfile | None:
         """
         Fetches the selected profile for a player UUID.
 

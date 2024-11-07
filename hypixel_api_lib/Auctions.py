@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, tzinfo
 import requests
 
 ACTIVE_AUCTIONS_API_URL = r"https://api.hypixel.net/skyblock/auctions"
@@ -18,20 +18,20 @@ class Bid:
         timestamp (datetime): The timestamp of the bid.
     """
 
-    def __init__(self, bid_data):
-        self.auction_id = bid_data.get('auction_id')
-        self.bidder = bid_data.get('bidder')
-        self.profile_id = bid_data.get('profile_id')
-        self.amount = bid_data.get('amount')
-        self.timestamp = self._convert_timestamp(bid_data.get('timestamp'))
+    def __init__(self, bid_data : dict) -> None:
+        self.auction_id: str = bid_data.get('auction_id')
+        self.bidder: str = bid_data.get('bidder')
+        self.profile_id: str = bid_data.get('profile_id')
+        self.amount: int = bid_data.get('amount')
+        self.timestamp: datetime | None = self._convert_timestamp(bid_data.get('timestamp'))
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z") if self.timestamp else "N/A"
         return f"Bid of {self.amount} by {self.bidder} at {timestamp_str}"
 
@@ -57,36 +57,36 @@ class SkyBlockAuction:
         claimed (bool): Whether the auction has been claimed.
         claimed_bidders (list): List of bidders who have claimed the item.
         highest_bid_amount (int): The highest bid amount.
-        bids (list of Bid): List of bids.
+        bids (list[Bid]): List of bids.
     """
 
-    def __init__(self, auction_data):
-        self._id = auction_data.get('_id')
-        self.uuid = auction_data.get('uuid')
-        self.auctioneer = auction_data.get('auctioneer')
-        self.profile_id = auction_data.get('profile_id')
-        self.coop = auction_data.get('coop', [])
-        self.start = self._convert_timestamp(auction_data.get('start'))
-        self.end = self._convert_timestamp(auction_data.get('end'))
-        self.item_name = auction_data.get('item_name')
-        self.item_lore = auction_data.get('item_lore')
-        self.extra = auction_data.get('extra')
-        self.category = auction_data.get('category')
-        self.tier = auction_data.get('tier')
-        self.starting_bid = auction_data.get('starting_bid')
-        self.item_bytes = auction_data.get('item_bytes')
-        self.claimed = auction_data.get('claimed')
-        self.claimed_bidders = auction_data.get('claimed_bidders', [])
-        self.highest_bid_amount = auction_data.get('highest_bid_amount')
-        self.bids = [Bid(bid) for bid in auction_data.get('bids', [])]
+    def __init__(self, auction_data: dict) -> None:
+        self._id: str = auction_data.get('_id')
+        self.uuid: str = auction_data.get('uuid')
+        self.auctioneer: str = auction_data.get('auctioneer')
+        self.profile_id: str = auction_data.get('profile_id')
+        self.coop: list[str] = auction_data.get('coop', [])
+        self.start: datetime | None = self._convert_timestamp(auction_data.get('start'))
+        self.end: datetime | None = self._convert_timestamp(auction_data.get('end'))
+        self.item_name: str = auction_data.get('item_name')
+        self.item_lore: str = auction_data.get('item_lore')
+        self.extra: str = auction_data.get('extra')
+        self.category: str = auction_data.get('category')
+        self.tier: str = auction_data.get('tier')
+        self.starting_bid: int = auction_data.get('starting_bid')
+        self.item_bytes: object = auction_data.get('item_bytes')
+        self.claimed: bool = auction_data.get('claimed')
+        self.claimed_bidders: list = auction_data.get('claimed_bidders', [])
+        self.highest_bid_amount: int = auction_data.get('highest_bid_amount')
+        self.bids: list[Bid] | None = [Bid(bid) for bid in auction_data.get('bids', [])]
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def get_start_time_in_timezone(self, tz):
+    def get_start_time_in_timezone(self, tz: tzinfo) -> datetime | None:
         """
         Get the start time converted to the specified time zone.
 
@@ -100,7 +100,7 @@ class SkyBlockAuction:
             return self.start.astimezone(tz)
         return None
 
-    def get_end_time_in_timezone(self, tz):
+    def get_end_time_in_timezone(self, tz: tzinfo) -> datetime | None:
         """
         Get the end time converted to the specified time zone.
 
@@ -115,7 +115,7 @@ class SkyBlockAuction:
         return None
 
     @property
-    def current_price(self):
+    def current_price(self) -> int:
         """
         Get the current price of the auction.
 
@@ -131,7 +131,7 @@ class SkyBlockAuction:
             return max(self.starting_bid, self.highest_bid_amount)
 
     @property
-    def is_bin(self):
+    def is_bin(self) -> bool:
         """
         Estimate whether the auction is a BIN auction.
 
@@ -141,7 +141,7 @@ class SkyBlockAuction:
         # Since I can't know from the API, I'm assume auctions with no bids are BIN
         return not self.bids
 
-    def __str__(self):
+    def __str__(self) -> str:
         auction_type = "BIN" if self.is_bin else "Auction"
         return f"{auction_type} '{self.item_name}' by {self.auctioneer}, Price: {self.current_price}"
 
@@ -155,24 +155,24 @@ class AuctionsPage:
         totalPages (int): The total number of pages.
         totalAuctions (int): The total number of auctions.
         lastUpdated (datetime): The last updated timestamp.
-        auctions (list of SkyBlockAuction): The list of auctions on this page.
+        auctions (list[SkyBlockAuction]): The list of auctions on this page.
     """
 
-    def __init__(self, page_data):
-        self.success = page_data.get('success', False)
-        self.page = page_data.get('page', 0)
-        self.totalPages = page_data.get('totalPages', 0)
-        self.totalAuctions = page_data.get('totalAuctions', 0)
-        self.lastUpdated = self._convert_timestamp(page_data.get('lastUpdated'))
-        self.auctions = [SkyBlockAuction(auction) for auction in page_data.get('auctions', [])]
+    def __init__(self, page_data: dict) -> None:
+        self.success: bool = page_data.get('success', False)
+        self.page: int = page_data.get('page', 0)
+        self.totalPages: int = page_data.get('totalPages', 0)
+        self.totalAuctions: int = page_data.get('totalAuctions', 0)
+        self.lastUpdated: datetime | None = self._convert_timestamp(page_data.get('lastUpdated'))
+        self.auctions: list[SkyBlockAuction] = [SkyBlockAuction(auction) for auction in page_data.get('auctions', [])]
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def get_auction_by_id(self, auction_id):
+    def get_auction_by_id(self, auction_id: str) -> SkyBlockAuction | None:
         """
         Retrieve an auction by its ID from the current page.
 
@@ -184,7 +184,7 @@ class AuctionsPage:
         """
         return next((auction for auction in self.auctions if auction._id == auction_id), None)
 
-    def get_auctions_by_item_name(self, item_name):
+    def get_auctions_by_item_name(self, item_name: str) -> SkyBlockAuction:
         """
         Retrieve auctions by item name from the current page.
 
@@ -196,7 +196,7 @@ class AuctionsPage:
         """
         return [auction for auction in self.auctions if auction.item_name.lower() == item_name.lower()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Auctions Page {self.page}/{self.totalPages}, Total Auctions: {self.totalAuctions}"
 
 class ActiveAuctions:
@@ -209,14 +209,14 @@ class ActiveAuctions:
         cache_pages (dict): Cached pages of auctions.
     """
 
-    def __init__(self, api_endpoint=ACTIVE_AUCTIONS_API_URL, preload_all=False):
-        self._api_endpoint = api_endpoint
-        self.all_auctions = []
-        self.cache_pages = {}
+    def __init__(self, api_endpoint: str = ACTIVE_AUCTIONS_API_URL, preload_all: bool = False) -> None:
+        self._api_endpoint: str = api_endpoint
+        self.all_auctions: list[SkyBlockAuction] | list = []
+        self.cache_pages: dict[int, AuctionsPage] | dict = {}
         if preload_all:
             self.all_auctions = self.get_all_auctions()
 
-    def get_page(self, page_number=0):
+    def get_page(self, page_number: int = 0) -> AuctionsPage:
         """
         Fetch a specific page of auctions, using cache if available.
 
@@ -244,7 +244,7 @@ class ActiveAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching page {page_number}: {e}")
 
-    def get_all_auctions(self):
+    def get_all_auctions(self) -> list[SkyBlockAuction]:
         """
         Fetch all auctions by iterating through all available pages.
 
@@ -266,7 +266,7 @@ class ActiveAuctions:
         self.all_auctions = all_auctions  # Cache the results
         return all_auctions
 
-    def search_auctions(self, item_name=None, min_price=None, max_price=None, sort_by_price=False, descending=False, max_pages=None):
+    def search_auctions(self, item_name: str | None = None, min_price: int | None = None, max_price: int | None = None, sort_by_price: bool = False, descending: bool = False, max_pages: int | None = None) -> list[SkyBlockAuction]:
         """
         Search for auctions matching the specified criteria.
 
@@ -300,7 +300,7 @@ class ActiveAuctions:
                 auctions_to_search.extend(page.auctions)
 
         # Function to check if an auction matches the criteria
-        def matches(auction):
+        def matches(auction: SkyBlockAuction) -> bool:
             if item_name and item_name.lower() not in auction.item_name.lower():
                 return False
             price = auction.current_price
@@ -319,7 +319,7 @@ class ActiveAuctions:
 
         return matching_auctions
 
-    def get_auction_by_id(self, auction_id):
+    def get_auction_by_id(self, auction_id: str) -> SkyBlockAuction | None:
         """
         Fetch a specific auction by its ID.
 
@@ -339,7 +339,7 @@ class ActiveAuctions:
                 return auction
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Auctions Manager using endpoint {self._api_endpoint}"
 
 class RecentlyEndedAuction:
@@ -361,24 +361,24 @@ class RecentlyEndedAuction:
         item_bytes (str): Serialized item data.
     """
 
-    def __init__(self, auction_data):
-        self.auction_id = auction_data.get('auction_id')
-        self.seller = auction_data.get('seller')
-        self.seller_profile = auction_data.get('seller_profile')
-        self.buyer = auction_data.get('buyer')
-        self.buyer_profile = auction_data.get('buyer_profile')
-        self.timestamp = self._convert_timestamp(auction_data.get('timestamp'))
-        self.price = auction_data.get('price')
-        self.bin = auction_data.get('bin', False)
-        self.item_bytes = auction_data.get('item_bytes')
+    def __init__(self, auction_data: dict) -> None:
+        self.auction_id: str = auction_data.get('auction_id')
+        self.seller: str = auction_data.get('seller')
+        self.seller_profile: str = auction_data.get('seller_profile')
+        self.buyer: str = auction_data.get('buyer')
+        self.buyer_profile: str = auction_data.get('buyer_profile')
+        self.timestamp: datetime | None = self._convert_timestamp(auction_data.get('timestamp'))
+        self.price: int = auction_data.get('price')
+        self.bin: bool = auction_data.get('bin', False)
+        self.item_bytes: str = auction_data.get('item_bytes')
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         auction_type = "BIN" if self.bin else "Auction"
         timestamp_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z") if self.timestamp else "N/A"
         return f"{auction_type} '{self.auction_id}' sold by {self.seller} to {self.buyer} at {timestamp_str} for {self.price}"
@@ -392,13 +392,13 @@ class RecentlyEndedAuctions:
         auctions (list of RecentlyEndedAuction): The list of recently ended auctions.
     """
 
-    def __init__(self, api_endpoint=RECENTLY_ENDED_AUCTIONS_API_URL):
-        self._api_endpoint = api_endpoint
-        self.last_updated = None
-        self.auctions = []
+    def __init__(self, api_endpoint: str = RECENTLY_ENDED_AUCTIONS_API_URL) -> None:
+        self._api_endpoint: str = api_endpoint
+        self.last_updated: datetime | None = None
+        self.auctions: list[RecentlyEndedAuction] | list = []
         self._load_ended_auctions()
 
-    def _load_ended_auctions(self):
+    def _load_ended_auctions(self) -> None:
         """
         Fetch recently ended auctions from the API.
         """
@@ -415,13 +415,13 @@ class RecentlyEndedAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching recently ended auctions: {e}")
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def get_auction_by_id(self, auction_id):
+    def get_auction_by_id(self, auction_id: str) -> RecentlyEndedAuction | None:
         """
         Retrieve an auction by its ID.
 
@@ -433,7 +433,7 @@ class RecentlyEndedAuctions:
         """
         return next((auction for auction in self.auctions if auction.auction_id == auction_id), None)
 
-    def search_auctions(self, seller=None, buyer=None, min_price=None, max_price=None, bin_only=None):
+    def search_auctions(self, seller: str | None = None, buyer: str | None = None, min_price: int | None = None, max_price: int | None = None, bin_only: bool | None = None) -> list[RecentlyEndedAuction]:
         """
         Search for auctions matching the specified criteria.
 
@@ -466,7 +466,7 @@ class RecentlyEndedAuctions:
 
         return matching_auctions
 
-    def __str__(self):
+    def __str__(self) -> str:
         last_updated_str = self.last_updated.strftime("%Y-%m-%d %H:%M:%S %Z") if self.last_updated else "N/A"
         return f"RecentlyEndedAuctions with {len(self.auctions)} auctions as of {last_updated_str}"
 
@@ -479,20 +479,20 @@ class PlayerAuctions:
         api_endpoint (str): The API endpoint URL.
     """
 
-    def __init__(self, api_key, api_endpoint=PLAYER_AUCTION_API_URL):
-        self._api_endpoint = api_endpoint
-        self.api_key = api_key
+    def __init__(self, api_key: str, api_endpoint: str = PLAYER_AUCTION_API_URL) -> None:
+        self._api_endpoint: str = api_endpoint
+        self.api_key: str = api_key
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def _get_uuid_from_username(self, username):
+    def _get_uuid_from_username(self, username: str) -> str:
         """
         Fetch the UUID of a player from their username using the Mojang API.
-        (This method may eventually need to migrate to some more general spot. 
+        TODO:(This method may eventually need to migrate to some more general spot. 
             Not sure how often we may reuse something like this yet)
 
         Args:
@@ -521,7 +521,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching UUID for username '{username}': {e}")
 
-    def get_auction_by_uuid(self, auction_uuid):
+    def get_auction_by_uuid(self, auction_uuid: str) -> SkyBlockAuction | None:
         """
         Fetch an auction by its auction UUID.
 
@@ -529,7 +529,11 @@ class PlayerAuctions:
             auction_uuid (str): The UUID of the auction.
 
         Returns:
-            SkyBlockAuction or None: The auction object, or None if not found.
+            SkyBlockAuction | None: The auction object, or None if not found.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'uuid': auction_uuid,
@@ -544,8 +548,7 @@ class PlayerAuctions:
                 if auctions_data:
                     # There should only be one auction in this case
                     auction_data = auctions_data[0]
-                    auction = SkyBlockAuction(auction_data)
-                    return auction
+                    return SkyBlockAuction(auction_data)
                 else:
                     return None
             else:
@@ -573,7 +576,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auction {auction_uuid}: {e}")
 
-    def get_auctions_by_player_uuid(self, player_uuid):
+    def get_auctions_by_player_uuid(self, player_uuid: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by player UUID.
 
@@ -581,7 +584,11 @@ class PlayerAuctions:
             player_uuid (str): The UUID of the player.
 
         Returns:
-            list of SkyBlockAuction: List of auctions created by the player.
+            list[SkyBlockAuction]: List of auctions created by the player.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'player': player_uuid,
@@ -593,8 +600,7 @@ class PlayerAuctions:
             data = response.json()
             if data.get('success'):
                 auctions_data = data.get('auctions', [])
-                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
-                return auctions
+                return [SkyBlockAuction(auction_data) for auction_data in auctions_data]
             else:
                 cause = data.get('cause', 'Unknown error')
                 raise ValueError(f"API response was not successful: {cause}")
@@ -620,7 +626,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auctions for player {player_uuid}: {e}")
 
-    def get_auctions_by_profile_uuid(self, profile_uuid):
+    def get_auctions_by_profile_uuid(self, profile_uuid: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by profile UUID.
 
@@ -628,7 +634,11 @@ class PlayerAuctions:
             profile_uuid (str): The UUID of the profile.
 
         Returns:
-            list of SkyBlockAuction: List of auctions associated with the profile.
+            list[SkyBlockAuction]: List of auctions associated with the profile.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'profile': profile_uuid,
@@ -640,8 +650,7 @@ class PlayerAuctions:
             data = response.json()
             if data.get('success'):
                 auctions_data = data.get('auctions', [])
-                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
-                return auctions
+                return [SkyBlockAuction(auction_data) for auction_data in auctions_data]
             else:
                 cause = data.get('cause', 'Unknown error')
                 raise ValueError(f"API response was not successful: {cause}")
@@ -667,7 +676,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auctions for profile {profile_uuid}: {e}")
 
-    def get_auctions_by_username(self, username):
+    def get_auctions_by_username(self, username: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by player's username.
 
@@ -675,11 +684,11 @@ class PlayerAuctions:
             username (str): The username of the player.
 
         Returns:
-            list of SkyBlockAuction: List of auctions created by the player.
+            list[SkyBlockAuction]: List of auctions created by the player.
 
         Raises:
-            ValueError: If the username does not exist.
-            ConnectionError: If there's an error contacting the Mojang or Hypixel API.
+            ValueError: If the username does not exist or the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         try:
             player_uuid = self._get_uuid_from_username(username)
@@ -689,5 +698,6 @@ class PlayerAuctions:
         except ConnectionError as ce:
             raise ce
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a string representation of the PlayerAuctions manager."""
         return f"PlayerAuctions Manager using endpoint {self._api_endpoint}"

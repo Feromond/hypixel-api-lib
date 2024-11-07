@@ -11,19 +11,19 @@ class JacobsContestEntry:
         claimed_medal (str or None): The medal claimed ('bronze', 'silver', etc.), if any.
     """
 
-    def __init__(self, contest_id, data):
-        self.contest_id = contest_id
-        self.collected = data.get('collected', 0)
-        self.claimed_rewards = data.get('claimed_rewards', False)
-        self.claimed_position = data.get('claimed_position')
-        self.claimed_participants = data.get('claimed_participants')
-        self.claimed_medal = data.get('claimed_medal')
+    def __init__(self, contest_id: str, data: dict) -> None:
+        self.contest_id: str = contest_id
+        self.collected: int = data.get('collected', 0)
+        self.claimed_rewards: bool = data.get('claimed_rewards', False)
+        self.claimed_position: int | None = data.get('claimed_position')
+        self.claimed_participants: int | None = data.get('claimed_participants')
+        self.claimed_medal: str | None = data.get('claimed_medal')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"Contest ID: {self.contest_id}, Collected: {self.collected}, "
                 f"Position: {self.claimed_position}, Medal: {self.claimed_medal}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
     
 
@@ -40,20 +40,20 @@ class JacobsContestData:
         unique_brackets (dict of str to list of str): Unique brackets achieved.
     """
 
-    def __init__(self, data):
-        self.medals_inv = data.get('medals_inv', {})
-        self.perks = data.get('perks', {})
-        self.talked = data.get('talked', False)
-        self.personal_bests = data.get('personal_bests', {})
-        self.unique_brackets = data.get('unique_brackets', {})
+    def __init__(self, data: dict) -> None:
+        self.medals_inv: dict[str,int] = data.get('medals_inv', {})
+        self.perks: dict = data.get('perks', {})
+        self.talked: bool = data.get('talked', False)
+        self.personal_bests: dict[str,int] = data.get('personal_bests', {})
+        self.unique_brackets: dict[str,list[str]] = data.get('unique_brackets', {})
 
-        contests_data = data.get('contests', {})
-        self.contests = {
+        contests_data: dict = data.get('contests', {})
+        self.contests: dict[str,JacobsContestEntry] = {
             contest_id: JacobsContestEntry(contest_id, contest_info)
             for contest_id, contest_info in contests_data.items()
         }
 
-    def __str__(self):
+    def __str__(self) -> str:
         medals = ', '.join(f"{medal}: {count}" for medal, count in self.medals_inv.items())
         return (f"JacobsContestData(Medals: {medals}, "
                 f"Contests Participated: {len(self.contests)}, Talked: {self.talked})")

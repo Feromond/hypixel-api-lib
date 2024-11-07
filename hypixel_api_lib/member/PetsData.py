@@ -7,11 +7,11 @@ class PetCareData:
         pet_types_sacrificed (list of str): List of pet types that have been sacrificed.
     """
 
-    def __init__(self, data):
-        self.coins_spent = data.get('coins_spent', 0.0)
-        self.pet_types_sacrificed = data.get('pet_types_sacrificed', [])
+    def __init__(self, data: dict) -> None:
+        self.coins_spent: float = data.get('coins_spent', 0.0)
+        self.pet_types_sacrificed: list[str] = data.get('pet_types_sacrificed', [])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"PetCareData(Coins Spent: {self.coins_spent}, Pets Sacrificed: {self.pet_types_sacrificed})"
 
 
@@ -29,16 +29,16 @@ class AutoPetRule:
         data (dict): Additional data associated with the rule.
     """
 
-    def __init__(self, data):
-        self.uuid = data.get('uuid')
-        self.rule_id = data.get('id')
-        self.name = data.get('name')
-        self.unique_id = data.get('uniqueId')
-        self.exceptions = data.get('exceptions', [])
-        self.disabled = data.get('disabled', False)
-        self.data = data.get('data', {})
+    def __init__(self, data: dict) -> None:
+        self.uuid: str = data.get('uuid')
+        self.rule_id: str = data.get('id')
+        self.name: str = data.get('name')
+        self.unique_id: str = data.get('uniqueId')
+        self.exceptions: list[dict] = data.get('exceptions', [])
+        self.disabled: bool = data.get('disabled', False)
+        self.data: dict = data.get('data', {})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"AutoPetRule(Name: {self.name}, Disabled: {self.disabled})"
 
 class AutoPetData:
@@ -52,13 +52,13 @@ class AutoPetData:
         migrated_2 (bool): Whether the secondary migration has occurred.
     """
 
-    def __init__(self, data):
-        self.rules_limit = data.get('rules_limit', 0)
-        self.rules = [AutoPetRule(rule) for rule in data.get('rules', [])]
-        self.migrated = data.get('migrated', False)
-        self.migrated_2 = data.get('migrated_2', False)
+    def __init__(self, data: dict) -> None:
+        self.rules_limit: int = data.get('rules_limit', 0)
+        self.rules: list[AutoPetRule] = [AutoPetRule(rule) for rule in data.get('rules', [])]
+        self.migrated: bool = data.get('migrated', False)
+        self.migrated_2: bool = data.get('migrated_2', False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"AutoPetData(Rules Limit: {self.rules_limit}, Rules Count: {len(self.rules)})"
 
 class PetData:
@@ -78,19 +78,19 @@ class PetData:
         extra (dict): Additional data for the pet.
     """
 
-    def __init__(self, data):
-        self.uuid = data.get('uuid')
-        self.unique_id = data.get('uniqueId')
-        self.type = data.get('type')
-        self.experience = data.get('exp', 0.0)
-        self.active = data.get('active', False)
-        self.tier = data.get('tier')
-        self.held_item = data.get('heldItem')
-        self.candy_used = data.get('candyUsed', 0)
-        self.skin = data.get('skin')
-        self.extra = data.get('extra', {})
+    def __init__(self, data: dict) -> None:
+        self.uuid: str = data.get('uuid')
+        self.unique_id: str = data.get('uniqueId')
+        self.type: str = data.get('type')
+        self.experience: float = data.get('exp', 0.0)
+        self.active: bool = data.get('active', False)
+        self.tier: str = data.get('tier')
+        self.held_item: str = data.get('heldItem')
+        self.candy_used: int = data.get('candyUsed', 0)
+        self.skin: str = data.get('skin')
+        self.extra: dict = data.get('extra', {})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"PetData(Type: {self.type}, Tier: {self.tier}, Active: {self.active})"
 
 class PetsData:
@@ -103,11 +103,11 @@ class PetsData:
         pets (list of PetData): List of all pets.
     """
 
-    def __init__(self, data):
-        self.pet_care = PetCareData(data.get('pet_care', {}))
-        self.autopet = AutoPetData(data.get('autopet', {}))
-        self.pets = [PetData(pet) for pet in data.get('pets', [])]
+    def __init__(self, data: dict) -> None:
+        self.pet_care: PetCareData = PetCareData(data.get('pet_care', {}))
+        self.autopet: AutoPetData = AutoPetData(data.get('autopet', {}))
+        self.pets: list[PetData] = [PetData(pet) for pet in data.get('pets', [])]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"PetsData(Pet Care: {self.pet_care}, AutoPet Rules: {len(self.autopet.rules)}, "
                 f"Total Pets: {len(self.pets)})")

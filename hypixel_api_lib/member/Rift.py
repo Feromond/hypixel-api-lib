@@ -13,13 +13,13 @@ class InventoryData:
         data (str): Decoded or decompressed data, or an error message if decoding fails.
     """
 
-    def __init__(self, data):
-        self.type = data.get('type')
-        self.raw_data = data.get('data', '')
+    def __init__(self, data: dict) -> None:
+        self.type: int = data.get('type')
+        self.raw_data: str = data.get('data', '')
 
-        self.data = self._decode_data(self.raw_data)
+        self.data: str = self._decode_data(self.raw_data)
 
-    def _decode_data(self, data):
+    def _decode_data(self, data: str) -> str:
         """Attempt to decode and decompress the inventory data."""
         if not data:
             return "No data available"
@@ -40,105 +40,104 @@ class InventoryData:
         except (base64.binascii.Error, zlib.error) as e:
             return f"Error decoding inventory: {e}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         data_preview = self.data[:500] + "..." if len(self.data) > 500 else self.data
         return f"InventoryData(Type: {self.type}, Data Preview: {data_preview})"
 
 
-
 class VillagePlaza:
-    def __init__(self, data):
-        self.murder = data.get('murder', {})
-        self.barry_center = data.get('barry_center', {})
-        self.cowboy = data.get('cowboy', {})
-        self.barter_bank = data.get('barter_bank', {})
-        self.lonely = data.get('lonely', {})
-        self.seraphine = data.get('seraphine', {})
+    def __init__(self, data: dict) -> None:
+        self.murder: dict = data.get('murder', {})
+        self.barry_center: dict = data.get('barry_center', {})
+        self.cowboy: dict = data.get('cowboy', {})
+        self.barter_bank: dict = data.get('barter_bank', {})
+        self.lonely: dict = data.get('lonely', {})
+        self.seraphine: dict = data.get('seraphine', {})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"VillagePlaza(Murder: {self.murder}, Barry Center: {self.barry_center}, Cowboy: {self.cowboy}, Barter Bank: {self.barter_bank}, Lonely: {self.lonely}, Seraphine: {self.seraphine})"
 
 
 class WitherCage:
-    def __init__(self, data):
-        self.killed_eyes = data.get('killed_eyes', [])
+    def __init__(self, data: dict) -> None:
+        self.killed_eyes: list = data.get('killed_eyes', [])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"WitherCage(Killed Eyes: {self.killed_eyes})"
 
 
 class BlackLagoon:
-    def __init__(self, data):
-        self.talked_to_edwin = data.get('talked_to_edwin', False)
-        self.received_science_paper = data.get('received_science_paper', False)
-        self.completed_step = data.get('completed_step', 0)
-        self.delivered_science_paper = data.get('delivered_science_paper', False)
+    def __init__(self, data: dict) -> None:
+        self.talked_to_edwin: bool = data.get('talked_to_edwin', False)
+        self.received_science_paper: bool = data.get('received_science_paper', False)
+        self.completed_step: int = data.get('completed_step', 0)
+        self.delivered_science_paper: bool = data.get('delivered_science_paper', False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"BlackLagoon(Talked to Edwin: {self.talked_to_edwin}, Received Science Paper: {self.received_science_paper}, Completed Step: {self.completed_step}, Delivered Science Paper: {self.delivered_science_paper})"
 
 
 class DeadCats:
-    def __init__(self, data):
-        self.talked_to_jacquelle = data.get('talked_to_jacquelle', False)
-        self.picked_up_detector = data.get('picked_up_detector', False)
-        self.found_cats = data.get('found_cats', [])
-        self.unlocked_pet = data.get('unlocked_pet', False)
-        self.montezuma = data.get('montezuma', {})
+    def __init__(self, data: dict) -> None:
+        self.talked_to_jacquelle: bool = data.get('talked_to_jacquelle', False)
+        self.picked_up_detector: bool = data.get('picked_up_detector', False)
+        self.found_cats: list = data.get('found_cats', [])
+        self.unlocked_pet: bool = data.get('unlocked_pet', False)
+        self.montezuma: dict = data.get('montezuma', {})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"DeadCats(Talked to Jacquelle: {self.talked_to_jacquelle}, Picked Up Detector: {self.picked_up_detector}, Found Cats: {self.found_cats}, Unlocked Pet: {self.unlocked_pet}, Montezuma: {self.montezuma})"
 
 
 class WizardTower:
-    def __init__(self, data):
-        self.wizard_quest_step = data.get('wizard_quest_step', 0)
-        self.crumbs_laid_out = data.get('crumbs_laid_out', 0)
+    def __init__(self, data: dict) -> None:
+        self.wizard_quest_step: int = data.get('wizard_quest_step', 0)
+        self.crumbs_laid_out: int = data.get('crumbs_laid_out', 0)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"WizardTower(Wizard Quest Step: {self.wizard_quest_step}, Crumbs Laid Out: {self.crumbs_laid_out})"
 
 
 class Enigma:
-    def __init__(self, data):
-        self.bought_cloak = data.get('bought_cloak', False)
-        self.found_souls = data.get('found_souls', [])
-        self.claimed_bonus_index = data.get('claimed_bonus_index', 0)
+    def __init__(self, data: dict) -> None:
+        self.bought_cloak: bool = data.get('bought_cloak', False)
+        self.found_souls: list = data.get('found_souls', [])
+        self.claimed_bonus_index: int = data.get('claimed_bonus_index', 0)
 
-    def __str__(self):
+    def __str__(self) -> None:
         return f"Enigma(Bought Cloak: {self.bought_cloak}, Found Souls: {self.found_souls}, Claimed Bonus Index: {self.claimed_bonus_index})"
 
 
 class Gallery:
-    def __init__(self, data):
-        self.elise_step = data.get('elise_step', 0)
-        self.secured_trophies = data.get('secured_trophies', [])
-        self.sent_trophy_dialogues = data.get('sent_trophy_dialogues', [])
+    def __init__(self, data: dict) -> None:
+        self.elise_step: int = data.get('elise_step', 0)
+        self.secured_trophies: list = data.get('secured_trophies', [])
+        self.sent_trophy_dialogues: list = data.get('sent_trophy_dialogues', [])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Gallery(Elise Step: {self.elise_step}, Secured Trophies: {self.secured_trophies}, Sent Trophy Dialogues: {self.sent_trophy_dialogues})"
 
 
 class WestVillage:
-    def __init__(self, data):
-        self.crazy_kloon = data.get('crazy_kloon', {})
-        self.mirrorverse = data.get('mirrorverse', {})
-        self.kat_house = data.get('kat_house', {})
-        self.glyphs = data.get('glyphs', {})
+    def __init__(self, data: dict) -> None:
+        self.crazy_kloon: dict = data.get('crazy_kloon', {})
+        self.mirrorverse: dict = data.get('mirrorverse', {})
+        self.kat_house: dict = data.get('kat_house', {})
+        self.glyphs: dict = data.get('glyphs', {})
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"WestVillage(Crazy Kloon: {self.crazy_kloon}, Mirrorverse: {self.mirrorverse}, Kat House: {self.kat_house}, Glyphs: {self.glyphs})"
 
 
 class WyldWoods:
-    def __init__(self, data):
-        self.talked_threebrothers = data.get('talked_threebrothers', [])
-        self.sirius_started_q_a = data.get('sirius_started_q_a', False)
-        self.bughunter_step = data.get('bughunter_step', 0)
-        self.sirius_q_a_chain_done = data.get('sirius_q_a_chain_done', False)
-        self.sirius_claimed_doubloon = data.get('sirius_claimed_doubloon', False)
+    def __init__(self, data: dict) -> None:
+        self.talked_threebrothers: list = data.get('talked_threebrothers', [])
+        self.sirius_started_q_a: bool = data.get('sirius_started_q_a', False)
+        self.bughunter_step: int = data.get('bughunter_step', 0)
+        self.sirius_q_a_chain_done: bool = data.get('sirius_q_a_chain_done', False)
+        self.sirius_claimed_doubloon: bool = data.get('sirius_claimed_doubloon', False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"WyldWoods(Talked to Three Brothers: {self.talked_threebrothers}, Sirius Started Q&A: {self.sirius_started_q_a}, Bug Hunter Step: {self.bughunter_step}, Sirius Q&A Chain Done: {self.sirius_q_a_chain_done}, Sirius Claimed Doubloon: {self.sirius_claimed_doubloon})"
 
 
@@ -165,26 +164,26 @@ class RiftData:
         equipment_contents (InventoryData): Equipment contents.
     """
 
-    def __init__(self, data):
-        self.village_plaza = VillagePlaza(data.get('village_plaza', {}))
-        self.wither_cage = WitherCage(data.get('wither_cage', {}))
-        self.black_lagoon = BlackLagoon(data.get('black_lagoon', {}))
-        self.dead_cats = DeadCats(data.get('dead_cats', {}))
-        self.wizard_tower = WizardTower(data.get('wizard_tower', {}))
-        self.enigma = Enigma(data.get('enigma', {}))
-        self.gallery = Gallery(data.get('gallery', {}))
-        self.west_village = WestVillage(data.get('west_village', {}))
-        self.wyld_woods = WyldWoods(data.get('wyld_woods', {}))
-        self.lifetime_purchased_boundaries = data.get('lifetime_purchased_boundaries', [])
-        self.access = data.get('access', {})
-        self.dreadfarm = data.get('dreadfarm', {})
+    def __init__(self, data: dict) -> None:
+        self.village_plaza: VillagePlaza = VillagePlaza(data.get('village_plaza', {}))
+        self.wither_cage: WitherCage = WitherCage(data.get('wither_cage', {}))
+        self.black_lagoon: BlackLagoon = BlackLagoon(data.get('black_lagoon', {}))
+        self.dead_cats: DeadCats = DeadCats(data.get('dead_cats', {}))
+        self.wizard_tower: WizardTower = WizardTower(data.get('wizard_tower', {}))
+        self.enigma: Enigma = Enigma(data.get('enigma', {}))
+        self.gallery: Gallery = Gallery(data.get('gallery', {}))
+        self.west_village: WestVillage = WestVillage(data.get('west_village', {}))
+        self.wyld_woods: WyldWoods = WyldWoods(data.get('wyld_woods', {}))
+        self.lifetime_purchased_boundaries: list = data.get('lifetime_purchased_boundaries', [])
+        self.access: dict = data.get('access', {})
+        self.dreadfarm: dict = data.get('dreadfarm', {})
 
-        self.inventory = InventoryData(data.get('inventory', {}).get('inv_contents', {}))
-        self.ender_chest_contents = InventoryData(data.get('ender_chest_contents', {}))
-        self.ender_chest_page_icons = data.get('ender_chest_page_icons', [])
-        self.equipment_contents = InventoryData(data.get('equipment_contents', {}))
+        self.inventory: InventoryData = InventoryData(data.get('inventory', {}).get('inv_contents', {}))
+        self.ender_chest_contents: InventoryData = InventoryData(data.get('ender_chest_contents', {}))
+        self.ender_chest_page_icons: list = data.get('ender_chest_page_icons', [])
+        self.equipment_contents: InventoryData = InventoryData(data.get('equipment_contents', {}))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"RiftData(\n"
             f"  Village Plaza: {self.village_plaza},\n"

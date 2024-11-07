@@ -12,12 +12,12 @@ class SkillLevel:
         unlocks (list): List of unlocks or rewards for achieving this level.
     """
     
-    def __init__(self, level, total_exp_required, unlocks):
-        self.level = level
-        self.total_exp_required = total_exp_required
-        self.unlocks = unlocks
+    def __init__(self, level: int, total_exp_required: float, unlocks: list) -> None:
+        self.level: int = level
+        self.total_exp_required: float = total_exp_required
+        self.unlocks: list = unlocks
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Level {self.level}: Requires {self.total_exp_required} XP, Unlocks: {self.unlocks}"
 
 class Skill:
@@ -31,13 +31,13 @@ class Skill:
         levels (list of SkillLevel): A list of SkillLevel objects representing the different levels.
     """
     
-    def __init__(self, name, description, max_level, levels_data):
-        self.name = name
-        self.description = description
-        self.max_level = max_level
-        self.levels = [SkillLevel(lvl['level'], lvl['totalExpRequired'], lvl['unlocks']) for lvl in levels_data]
+    def __init__(self, name: str, description: str, max_level: int, levels_data: list) -> None:
+        self.name: str = name
+        self.description: str = description
+        self.max_level: int = max_level
+        self.levels: list[SkillLevel] = [SkillLevel(lvl['level'], lvl['totalExpRequired'], lvl['unlocks']) for lvl in levels_data]
 
-    def get_level(self, level):
+    def get_level(self, level: int) -> SkillLevel | None:
         """
         Retrieve a specific level by its number.
         
@@ -49,7 +49,7 @@ class Skill:
         """
         return next((lvl for lvl in self.levels if lvl.level == level), None)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} (Max Level: {self.max_level}): {self.description}"
 
 class Skills:
@@ -61,12 +61,12 @@ class Skills:
         skills (dict of str: Skill): A dictionary of skill names (keys) to Skill objects.
     """
     
-    def __init__(self, api_endpoint=SKILLS_API_URL):
-        self.api_endpoint = api_endpoint
-        self.skills = None
+    def __init__(self, api_endpoint: str = SKILLS_API_URL) -> None:
+        self.api_endpoint: str = api_endpoint
+        self.skills: dict[str,Skill] | None = None
         self._load_skills()
 
-    def _load_skills(self):
+    def _load_skills(self) -> None:
         """Fetch skills data from the API and initialize Skill objects."""
         try:
             response = requests.get(self.api_endpoint)
@@ -88,7 +88,7 @@ class Skills:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred: {e}")
 
-    def get_skill(self, name):
+    def get_skill(self, name: str) -> Skill | str:
         """
         Retrieve a skill by its name.
         
@@ -100,7 +100,7 @@ class Skills:
         """
         return self.skills.get(name.upper(), f"Skill '{name}' not found.")
 
-    def get_skills_by_max_level(self, max_level):
+    def get_skills_by_max_level(self, max_level: int) -> dict[str,Skill]:
         """
         Retrieve all skills that have a specific maximum level.
         
@@ -112,7 +112,7 @@ class Skills:
         """
         return {name: skill for name, skill in self.skills.items() if skill.max_level == max_level}
 
-    def list_skill_names(self):
+    def list_skill_names(self) -> list[str]:
         """
         List all available skill names.
         

@@ -9,11 +9,11 @@ class Perk:
         level (int): The level of the perk.
     """
 
-    def __init__(self, name, level):
-        self.name = name
-        self.level = level
+    def __init__(self, name: str, level: int) -> None:
+        self.name: str = name
+        self.level: int = level
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name}: Level {self.level}"
 
 class SkillExperience:
@@ -25,14 +25,14 @@ class SkillExperience:
         experience (float): The amount of experience in the skill.
     """
 
-    def __init__(self, skill_name, experience):
-        self.skill_name = skill_name
-        self.experience = experience
+    def __init__(self, skill_name: str, experience: float) -> None:
+        self.skill_name: str = skill_name
+        self.experience: float = experience
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.skill_name}: {self.experience} XP"
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.skill_name}: {self.experience} XP"
 
 
@@ -58,39 +58,39 @@ class PlayerData:
         experience (dict of str to float): Experience in various skills.
     """
 
-    def __init__(self, data):
-        self.visited_zones = data.get('visited_zones', [])
-        self.last_death = self._convert_timestamp(data.get('last_death'))
-        self.perks = self._parse_perks(data.get('perks', {}))
-        self.active_effects = data.get('active_effects', [])
-        self.paused_effects = data.get('paused_effects', [])
-        self.temp_stat_buffs = data.get('temp_stat_buffs', [])
-        self.death_count = data.get('death_count', 0)
-        self.disabled_potion_effects = data.get('disabled_potion_effects', [])
-        self.achievement_spawned_island_types = data.get('achievement_spawned_island_types', [])
-        self.visited_modes = data.get('visited_modes', [])
-        self.unlocked_coll_tiers = data.get('unlocked_coll_tiers', [])
-        self.crafted_generators = data.get('crafted_generators', [])
-        self.fastest_target_practice = data.get('fastest_target_practice', None)
-        self.fishing_treasure_caught = data.get('fishing_treasure_caught', 0)
-        self.experience = self._parse_experience(data.get('experience', {}))
+    def __init__(self, data: dict) -> None:
+        self.visited_zones: list = data.get('visited_zones', [])
+        self.last_death: datetime | None = self._convert_timestamp(data.get('last_death'))
+        self.perks: dict[str,int] = self._parse_perks(data.get('perks', {}))
+        self.active_effects: list = data.get('active_effects', [])
+        self.paused_effects: list = data.get('paused_effects', [])
+        self.temp_stat_buffs: list = data.get('temp_stat_buffs', [])
+        self.death_count: int = data.get('death_count', 0)
+        self.disabled_potion_effects: list[str] = data.get('disabled_potion_effects', [])
+        self.achievement_spawned_island_types: list[str] = data.get('achievement_spawned_island_types', [])
+        self.visited_modes: list[str] = data.get('visited_modes', [])
+        self.unlocked_coll_tiers: list[str] = data.get('unlocked_coll_tiers', [])
+        self.crafted_generators: list[str] = data.get('crafted_generators', [])
+        self.fastest_target_practice: float | None = data.get('fastest_target_practice', None)
+        self.fishing_treasure_caught: int = data.get('fishing_treasure_caught', 0)
+        self.experience: dict[str,float] = self._parse_experience(data.get('experience', {}))
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
     
-    def _parse_perks(self, perks_dict):
+    def _parse_perks(self, perks_dict:dict) -> list[Perk]:
         """Convert the perks dictionary into a list of Perk objects."""
         return [Perk(name, level) for name, level in perks_dict.items()]
 
-    def _parse_experience(self, experience_dict):
+    def _parse_experience(self, experience_dict: dict) -> list[SkillExperience]:
         """Convert the experience dictionary into a list of SkillExperience objects."""
         return [SkillExperience(skill, xp) for skill, xp in experience_dict.items()]
 
-    def __str__(self):
+    def __str__(self) -> str:
         last_death_str = self.last_death.strftime('%Y-%m-%d %H:%M:%S') if self.last_death else 'N/A'
         return (f"PlayerData(Deaths: {self.death_count}, Last Death: {last_death_str}, "
                 f"Visited Zones: {len(self.visited_zones)}, Experience: {self.experience})")

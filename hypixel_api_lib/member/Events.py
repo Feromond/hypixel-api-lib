@@ -11,20 +11,20 @@ class EasterTimeTower:
         last_charge_time (datetime): Time when the last charge was used.
     """
 
-    def __init__(self, data):
-        self.charges = data.get('charges', 0)
-        self.activation_time = self._convert_timestamp(data.get('activation_time'))
-        self.level = data.get('level', 0)
-        self.last_charge_time = self._convert_timestamp(data.get('last_charge_time'))
+    def __init__(self, data: dict) -> None:
+        self.charges: int = data.get('charges', 0)
+        self.activation_time: datetime | None = self._convert_timestamp(data.get('activation_time'))
+        self.level: int = data.get('level', 0)
+        self.last_charge_time: datetime | None = self._convert_timestamp(data.get('last_charge_time'))
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         activation_time_str = self.activation_time.strftime('%Y-%m-%d %H:%M:%S') if self.activation_time else 'N/A'
         last_charge_time_str = self.last_charge_time.strftime('%Y-%m-%d %H:%M:%S') if self.last_charge_time else 'N/A'
         return (f"EasterTimeTower(Charges: {self.charges}, Level: {self.level}, "
@@ -39,10 +39,10 @@ class EasterEmployees:
         employee_levels (dict of str to int): Mapping of employee names to their levels.
     """
 
-    def __init__(self, data):
-        self.employee_levels = data
+    def __init__(self, data: dict[str, int]) -> None:
+        self.employee_levels: dict[str, int] = data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EasterEmployees(Employee Levels: {self.employee_levels})"
 
 
@@ -58,14 +58,14 @@ class EasterShop:
         cocoa_fortune_upgrades (int): Number of cocoa fortune upgrades purchased.
     """
 
-    def __init__(self, data):
-        self.year = data.get('year', 0)
-        self.rabbits = data.get('rabbits', [])
-        self.rabbits_purchased = data.get('rabbits_purchased', [])
-        self.chocolate_spent = data.get('chocolate_spent', 0)
-        self.cocoa_fortune_upgrades = data.get('cocoa_fortune_upgrades', 0)
+    def __init__(self, data: dict) -> None:
+        self.year: int = data.get('year', 0)
+        self.rabbits: list[str] = data.get('rabbits', [])
+        self.rabbits_purchased: list[str] = data.get('rabbits_purchased', [])
+        self.chocolate_spent: int = data.get('chocolate_spent', 0)
+        self.cocoa_fortune_upgrades: int = data.get('cocoa_fortune_upgrades', 0)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EasterShop(Year: {self.year}, Rabbits Purchased: {len(self.rabbits_purchased)}, "
                 f"Chocolate Spent: {self.chocolate_spent})")
 
@@ -79,13 +79,13 @@ class EasterRabbitsData:
         rabbit_counts (dict of str to int): Counts of each rabbit collected.
     """
 
-    def __init__(self, data):
-        self.collected_eggs = data.get('collected_eggs', {})
-        self.collected_locations = data.get('collected_locations', {})
+    def __init__(self, data: dict) -> None:
+        self.collected_eggs: dict[str,int] = data.get('collected_eggs', {})
+        self.collected_locations: dict[str,str] = data.get('collected_locations', {})
         # Exclude 'collected_eggs' and 'collected_locations' from rabbit_counts
-        self.rabbit_counts = {k: v for k, v in data.items() if k not in ('collected_eggs', 'collected_locations')}
+        self.rabbit_counts: dict[str,int] = {k: v for k, v in data.items() if k not in ('collected_eggs', 'collected_locations')}
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EasterRabbitsData(Collected Eggs: {self.collected_eggs}, "
                 f"Rabbit Counts: {len(self.rabbit_counts)} rabbits)")
 
@@ -113,32 +113,32 @@ class EasterEvent:
         rabbit_rarity_upgrades (int): Number of rabbit rarity upgrades.
     """
 
-    def __init__(self, data):
-        self.chocolate = data.get('chocolate', 0)
-        self.chocolate_since_prestige = data.get('chocolate_since_prestige', 0)
-        self.total_chocolate = data.get('total_chocolate', 0)
-        self.rabbits_data = EasterRabbitsData(data.get('rabbits', {}))
-        self.shop = EasterShop(data.get('shop', {}))
-        self.employees = EasterEmployees(data.get('employees', {}))
-        self.last_viewed_chocolate_factory = self._convert_timestamp(data.get('last_viewed_chocolate_factory'))
-        self.rabbit_barn_capacity_level = data.get('rabbit_barn_capacity_level', 0)
-        self.chocolate_level = data.get('chocolate_level', 0)
-        self.time_tower = EasterTimeTower(data.get('time_tower', {}))
-        self.rabbit_sort = data.get('rabbit_sort', '')
-        self.rabbit_filter = data.get('rabbit_filter', '')
-        self.el_dorado_progress = data.get('el_dorado_progress', 0)
-        self.chocolate_multiplier_upgrades = data.get('chocolate_multiplier_upgrades', 0)
-        self.click_upgrades = data.get('click_upgrades', 0)
-        self.rabbit_rarity_upgrades = data.get('rabbit_rarity_upgrades', 0)
+    def __init__(self, data: dict) -> None:
+        self.chocolate: int = data.get('chocolate', 0)
+        self.chocolate_since_prestige: int = data.get('chocolate_since_prestige', 0)
+        self.total_chocolate: int = data.get('total_chocolate', 0)
+        self.rabbits_data: EasterRabbitsData = EasterRabbitsData(data.get('rabbits', {}))
+        self.shop: EasterShop = EasterShop(data.get('shop', {}))
+        self.employees: EasterEmployees = EasterEmployees(data.get('employees', {}))
+        self.last_viewed_chocolate_factory: datetime | None = self._convert_timestamp(data.get('last_viewed_chocolate_factory'))
+        self.rabbit_barn_capacity_level: int = data.get('rabbit_barn_capacity_level', 0)
+        self.chocolate_level: int = data.get('chocolate_level', 0)
+        self.time_tower: EasterTimeTower = EasterTimeTower(data.get('time_tower', {}))
+        self.rabbit_sort: str = data.get('rabbit_sort', '')
+        self.rabbit_filter: str = data.get('rabbit_filter', '')
+        self.el_dorado_progress: int = data.get('el_dorado_progress', 0)
+        self.chocolate_multiplier_upgrades: int = data.get('chocolate_multiplier_upgrades', 0)
+        self.click_upgrades: int = data.get('click_upgrades', 0)
+        self.rabbit_rarity_upgrades: int = data.get('rabbit_rarity_upgrades', 0)
 
     @staticmethod
-    def _convert_timestamp(timestamp):
-        """Convert a timestamp in milliseconds to a datetime object in UTC."""
-        if timestamp is not None:
+    def _convert_timestamp(timestamp: int | None) -> datetime | None:
+        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
+        if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EasterEvent(Chocolate: {self.chocolate}, Total Chocolate: {self.total_chocolate}, "
                 f"RabbitsData: {self.rabbits_data}, Shop: {self.shop}, Employees: {self.employees}, "
                 f"TimeTower: {self.time_tower})")
@@ -153,8 +153,8 @@ class Events:
         # If there are ever any other events besides easter we can add them here
     """
 
-    def __init__(self, data):
-        self.easter = EasterEvent(data.get('easter', {})) if 'easter' in data else None
+    def __init__(self, data: dict) -> None:
+        self.easter: EasterEvent | None = EasterEvent(data.get('easter', {})) if 'easter' in data else None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Events(Easter: {self.easter})"
