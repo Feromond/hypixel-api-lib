@@ -21,32 +21,32 @@ class SkyBlockItem:
 
     def __init__(
         self,
-        id,
-        material,
-        name,
-        tier=None,
-        category=None,
-        stats=None,
-        npc_sell_price=None,
-        color=None,
-        skin=None,
-        durability=None,
-    ):
-        self.id = id
-        self.material = material
-        self.name = name
-        self.tier = tier if tier is not None else 'UNKNOWN'
-        self.category = category
-        self.stats = stats or {}
-        self.npc_sell_price = npc_sell_price
-        self.color = color
-        self.skin = skin
-        self.durability = durability
+        id: str,
+        material: str,
+        name: str,
+        tier: str | None = None,
+        category: str | None = None,
+        stats: dict | None = None,
+        npc_sell_price: int | None = None,
+        color: str | None = None,
+        skin: str | None = None,
+        durability: int | None = None,
+    ) -> None:
+        self.id: str = id
+        self.material: str = material
+        self.name: str = name
+        self.tier: str = tier if tier is not None else 'UNKNOWN'
+        self.category: str | None = category
+        self.stats: dict = stats or {}
+        self.npc_sell_price: int | None = npc_sell_price
+        self.color: str | None = color
+        self.skin: str | None = skin
+        self.durability: int | None = durability
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.tier}): ID={self.id}, Material={self.material}"
     
-    def get_formatted_stats(self):
+    def get_formatted_stats(self) -> str:
         if not self.stats:
             return "No stats available."
         return ', '.join(f"{key}: {value}" for key, value in self.stats.items())
@@ -57,15 +57,15 @@ class Items:
     
     Attributes:
         api_endpoint (str): The endpoint URL to fetch the items data.
-        items (dict of str: SkyBlockItem): A dictionary of item IDs to SkyBlockItem objects.
+        items (dict of [str: SkyBlockItem]): A dictionary of item IDs to SkyBlockItem objects.
     """
     
-    def __init__(self, api_endpoint=ITEMS_API_URL):
-        self.api_endpoint = api_endpoint
-        self.items = None
+    def __init__(self, api_endpoint: str = ITEMS_API_URL) -> None:
+        self.api_endpoint: str = api_endpoint
+        self.items: dict[str:SkyBlockItem] | None = None
         self._load_items()
 
-    def _load_items(self):
+    def _load_items(self) -> None:
         """Fetch items data from the API and initialize SkyBlockItem objects."""
         try:
             response = requests.get(self.api_endpoint)
@@ -93,7 +93,7 @@ class Items:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred: {e}")
 
-    def get_item(self, item_id):
+    def get_item(self, item_id: str) -> SkyBlockItem | str:
         """
         Retrieve an item by its ID.
         
@@ -109,7 +109,7 @@ class Items:
         else:
             return f"Item '{item_id}' not found."
 
-    def get_items_by_tier(self, tier):
+    def get_items_by_tier(self, tier: str) -> dict[str:SkyBlockItem]:
         """
         Retrieve all items that have a specific tier.
         
@@ -125,7 +125,7 @@ class Items:
             if item.tier is not None and item.tier.upper() == tier.upper()
         }
 
-    def get_items_by_category(self, category):
+    def get_items_by_category(self, category: str) -> dict[str:SkyBlockItem]:
         """
         Retrieve all items that belong to a specific category.
         
@@ -142,7 +142,7 @@ class Items:
         }
 
 
-    def list_item_names(self):
+    def list_item_names(self) -> list[str]:
         """
         List all available item names.
 
@@ -152,7 +152,7 @@ class Items:
         return [item.name for item in self.items.values()]
 
 
-    def list_item_categories(self):
+    def list_item_categories(self) -> list[str]:
         """
         List all unique item categories.
 
