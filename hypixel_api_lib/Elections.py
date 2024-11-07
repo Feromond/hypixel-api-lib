@@ -3,7 +3,7 @@ import requests
 
 URL = r"https://api.hypixel.net/v2/resources/skyblock/election"
 
-
+# TODO: Fix / Finish this page
 
 class Perk:
     def __init__(self, name: str, description: str, minister: bool = None) -> None:
