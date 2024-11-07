@@ -18,7 +18,7 @@ class Bid:
         timestamp (datetime): The timestamp of the bid.
     """
 
-    def __init__(self, bid_data):
+    def __init__(self, bid_data : dict | None) -> None:
         self.auction_id = bid_data.get('auction_id')
         self.bidder = bid_data.get('bidder')
         self.profile_id = bid_data.get('profile_id')
@@ -479,20 +479,20 @@ class PlayerAuctions:
         api_endpoint (str): The API endpoint URL.
     """
 
-    def __init__(self, api_key, api_endpoint=PLAYER_AUCTION_API_URL):
-        self._api_endpoint = api_endpoint
-        self.api_key = api_key
+    def __init__(self, api_key: str, api_endpoint: str = PLAYER_AUCTION_API_URL) -> None:
+        self._api_endpoint: str = api_endpoint
+        self.api_key: str = api_key
 
-    def _convert_timestamp(self, timestamp):
+    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
         """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
 
-    def _get_uuid_from_username(self, username):
+    def _get_uuid_from_username(self, username: str) -> str:
         """
         Fetch the UUID of a player from their username using the Mojang API.
-        (This method may eventually need to migrate to some more general spot. 
+        TODO:(This method may eventually need to migrate to some more general spot. 
             Not sure how often we may reuse something like this yet)
 
         Args:
@@ -521,7 +521,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching UUID for username '{username}': {e}")
 
-    def get_auction_by_uuid(self, auction_uuid):
+    def get_auction_by_uuid(self, auction_uuid: str) -> SkyBlockAuction | None:
         """
         Fetch an auction by its auction UUID.
 
@@ -529,7 +529,11 @@ class PlayerAuctions:
             auction_uuid (str): The UUID of the auction.
 
         Returns:
-            SkyBlockAuction or None: The auction object, or None if not found.
+            SkyBlockAuction | None: The auction object, or None if not found.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'uuid': auction_uuid,
@@ -544,8 +548,7 @@ class PlayerAuctions:
                 if auctions_data:
                     # There should only be one auction in this case
                     auction_data = auctions_data[0]
-                    auction = SkyBlockAuction(auction_data)
-                    return auction
+                    return SkyBlockAuction(auction_data)
                 else:
                     return None
             else:
@@ -573,7 +576,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auction {auction_uuid}: {e}")
 
-    def get_auctions_by_player_uuid(self, player_uuid):
+    def get_auctions_by_player_uuid(self, player_uuid: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by player UUID.
 
@@ -581,7 +584,11 @@ class PlayerAuctions:
             player_uuid (str): The UUID of the player.
 
         Returns:
-            list of SkyBlockAuction: List of auctions created by the player.
+            list[SkyBlockAuction]: List of auctions created by the player.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'player': player_uuid,
@@ -593,8 +600,7 @@ class PlayerAuctions:
             data = response.json()
             if data.get('success'):
                 auctions_data = data.get('auctions', [])
-                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
-                return auctions
+                return [SkyBlockAuction(auction_data) for auction_data in auctions_data]
             else:
                 cause = data.get('cause', 'Unknown error')
                 raise ValueError(f"API response was not successful: {cause}")
@@ -620,7 +626,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auctions for player {player_uuid}: {e}")
 
-    def get_auctions_by_profile_uuid(self, profile_uuid):
+    def get_auctions_by_profile_uuid(self, profile_uuid: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by profile UUID.
 
@@ -628,7 +634,11 @@ class PlayerAuctions:
             profile_uuid (str): The UUID of the profile.
 
         Returns:
-            list of SkyBlockAuction: List of auctions associated with the profile.
+            list[SkyBlockAuction]: List of auctions associated with the profile.
+
+        Raises:
+            ValueError: If the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         params = {
             'profile': profile_uuid,
@@ -640,8 +650,7 @@ class PlayerAuctions:
             data = response.json()
             if data.get('success'):
                 auctions_data = data.get('auctions', [])
-                auctions = [SkyBlockAuction(auction_data) for auction_data in auctions_data]
-                return auctions
+                return [SkyBlockAuction(auction_data) for auction_data in auctions_data]
             else:
                 cause = data.get('cause', 'Unknown error')
                 raise ValueError(f"API response was not successful: {cause}")
@@ -667,7 +676,7 @@ class PlayerAuctions:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching auctions for profile {profile_uuid}: {e}")
 
-    def get_auctions_by_username(self, username):
+    def get_auctions_by_username(self, username: str) -> list[SkyBlockAuction]:
         """
         Fetch auctions by player's username.
 
@@ -675,11 +684,11 @@ class PlayerAuctions:
             username (str): The username of the player.
 
         Returns:
-            list of SkyBlockAuction: List of auctions created by the player.
+            list[SkyBlockAuction]: List of auctions created by the player.
 
         Raises:
-            ValueError: If the username does not exist.
-            ConnectionError: If there's an error contacting the Mojang or Hypixel API.
+            ValueError: If the username does not exist or the API response indicates an error.
+            ConnectionError: If there's a network-related error.
         """
         try:
             player_uuid = self._get_uuid_from_username(username)
@@ -689,5 +698,6 @@ class PlayerAuctions:
         except ConnectionError as ce:
             raise ce
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a string representation of the PlayerAuctions manager."""
         return f"PlayerAuctions Manager using endpoint {self._api_endpoint}"
