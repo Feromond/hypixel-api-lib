@@ -125,7 +125,7 @@ class SkyBlockProfile:
 
     def __init__(self, data: dict) -> None:
         self.profile_id: str = data.get('profile_id')
-        self.members: dict[str:SkyBlockProfileMember] = {}
+        self.members: dict[str,SkyBlockProfileMember] = {}
         members_data: dict = data.get('members', {})
         for uuid, member_data in members_data.items():
             self.members[uuid] = SkyBlockProfileMember(uuid, member_data)

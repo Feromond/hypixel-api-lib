@@ -12,7 +12,7 @@ class GlacitePlayerData:
     def __init__(self, data: dict) -> None:
         self.fossils_donated: list[str] = data.get('fossils_donated', [])
         self.fossil_dust: float = data.get('fossil_dust', 0.0)
-        self.corpses_looted: dict[str:int] = data.get('corpses_looted', {})
+        self.corpses_looted: dict[str,int] = data.get('corpses_looted', {})
         self.mineshafts_entered: int = data.get('mineshafts_entered', 0)
 
     def __str__(self) -> str:

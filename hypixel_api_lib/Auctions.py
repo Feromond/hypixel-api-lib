@@ -212,7 +212,7 @@ class ActiveAuctions:
     def __init__(self, api_endpoint: str = ACTIVE_AUCTIONS_API_URL, preload_all: bool = False) -> None:
         self._api_endpoint: str = api_endpoint
         self.all_auctions: list[SkyBlockAuction] | list = []
-        self.cache_pages: dict[int: AuctionsPage] | dict = {}
+        self.cache_pages: dict[int, AuctionsPage] | dict = {}
         if preload_all:
             self.all_auctions = self.get_all_auctions()
 

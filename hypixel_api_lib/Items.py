@@ -62,7 +62,7 @@ class Items:
     
     def __init__(self, api_endpoint: str = ITEMS_API_URL) -> None:
         self.api_endpoint: str = api_endpoint
-        self.items: dict[str:SkyBlockItem] | None = None
+        self.items: dict[str,SkyBlockItem] | None = None
         self._load_items()
 
     def _load_items(self) -> None:
@@ -109,7 +109,7 @@ class Items:
         else:
             return f"Item '{item_id}' not found."
 
-    def get_items_by_tier(self, tier: str) -> dict[str:SkyBlockItem]:
+    def get_items_by_tier(self, tier: str) -> dict[str,SkyBlockItem]:
         """
         Retrieve all items that have a specific tier.
         
@@ -125,7 +125,7 @@ class Items:
             if item.tier is not None and item.tier.upper() == tier.upper()
         }
 
-    def get_items_by_category(self, category: str) -> dict[str:SkyBlockItem]:
+    def get_items_by_category(self, category: str) -> dict[str,SkyBlockItem]:
         """
         Retrieve all items that belong to a specific category.
         

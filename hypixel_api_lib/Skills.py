@@ -63,7 +63,7 @@ class Skills:
     
     def __init__(self, api_endpoint: str = SKILLS_API_URL) -> None:
         self.api_endpoint: str = api_endpoint
-        self.skills: dict[str:Skill] | None = None
+        self.skills: dict[str,Skill] | None = None
         self._load_skills()
 
     def _load_skills(self) -> None:
@@ -100,7 +100,7 @@ class Skills:
         """
         return self.skills.get(name.upper(), f"Skill '{name}' not found.")
 
-    def get_skills_by_max_level(self, max_level: int) -> dict[str:Skill]:
+    def get_skills_by_max_level(self, max_level: int) -> dict[str,Skill]:
         """
         Retrieve all skills that have a specific maximum level.
         

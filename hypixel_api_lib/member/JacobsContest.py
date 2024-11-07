@@ -41,14 +41,14 @@ class JacobsContestData:
     """
 
     def __init__(self, data: dict) -> None:
-        self.medals_inv: dict[str:int] = data.get('medals_inv', {})
+        self.medals_inv: dict[str,int] = data.get('medals_inv', {})
         self.perks: dict = data.get('perks', {})
         self.talked: bool = data.get('talked', False)
-        self.personal_bests: dict[str:int] = data.get('personal_bests', {})
-        self.unique_brackets: dict[str:list[str]] = data.get('unique_brackets', {})
+        self.personal_bests: dict[str,int] = data.get('personal_bests', {})
+        self.unique_brackets: dict[str,list[str]] = data.get('unique_brackets', {})
 
         contests_data: dict = data.get('contests', {})
-        self.contests: dict[str:JacobsContestEntry] = {
+        self.contests: dict[str,JacobsContestEntry] = {
             contest_id: JacobsContestEntry(contest_id, contest_info)
             for contest_id, contest_info in contests_data.items()
         }

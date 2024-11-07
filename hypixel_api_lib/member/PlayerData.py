@@ -61,7 +61,7 @@ class PlayerData:
     def __init__(self, data: dict) -> None:
         self.visited_zones: list = data.get('visited_zones', [])
         self.last_death: datetime | None = self._convert_timestamp(data.get('last_death'))
-        self.perks: dict[str:int] = self._parse_perks(data.get('perks', {}))
+        self.perks: dict[str,int] = self._parse_perks(data.get('perks', {}))
         self.active_effects: list = data.get('active_effects', [])
         self.paused_effects: list = data.get('paused_effects', [])
         self.temp_stat_buffs: list = data.get('temp_stat_buffs', [])
@@ -73,7 +73,7 @@ class PlayerData:
         self.crafted_generators: list[str] = data.get('crafted_generators', [])
         self.fastest_target_practice: float | None = data.get('fastest_target_practice', None)
         self.fishing_treasure_caught: int = data.get('fishing_treasure_caught', 0)
-        self.experience: dict[str:float] = self._parse_experience(data.get('experience', {}))
+        self.experience: dict[str,float] = self._parse_experience(data.get('experience', {}))
 
     @staticmethod
     def _convert_timestamp(timestamp: int | None) -> datetime | None:
