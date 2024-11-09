@@ -1,10 +1,10 @@
 from datetime import datetime, timezone, tzinfo
 import requests
+from hypixel_api_lib.utils import get_uuid_from_username, convert_timestamp
 
 ACTIVE_AUCTIONS_API_URL = r"https://api.hypixel.net/skyblock/auctions"
 RECENTLY_ENDED_AUCTIONS_API_URL = r"https://api.hypixel.net/skyblock/auctions_ended"
 PLAYER_AUCTION_API_URL = r"https://api.hypixel.net/skyblock/auction"
-MOJANG_API_URL = r"https://api.mojang.com/users/profiles/minecraft/"
 
 class Bid:
     """
@@ -23,13 +23,7 @@ class Bid:
         self.bidder: str = bid_data.get('bidder')
         self.profile_id: str = bid_data.get('profile_id')
         self.amount: int = bid_data.get('amount')
-        self.timestamp: datetime | None = self._convert_timestamp(bid_data.get('timestamp'))
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
+        self.timestamp: datetime | None = convert_timestamp(bid_data.get('timestamp'))
 
     def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z") if self.timestamp else "N/A"
@@ -66,8 +60,8 @@ class SkyBlockAuction:
         self.auctioneer: str = auction_data.get('auctioneer')
         self.profile_id: str = auction_data.get('profile_id')
         self.coop: list[str] = auction_data.get('coop', [])
-        self.start: datetime | None = self._convert_timestamp(auction_data.get('start'))
-        self.end: datetime | None = self._convert_timestamp(auction_data.get('end'))
+        self.start: datetime | None = convert_timestamp(auction_data.get('start'))
+        self.end: datetime | None = convert_timestamp(auction_data.get('end'))
         self.item_name: str = auction_data.get('item_name')
         self.item_lore: str = auction_data.get('item_lore')
         self.extra: str = auction_data.get('extra')
@@ -79,12 +73,6 @@ class SkyBlockAuction:
         self.claimed_bidders: list = auction_data.get('claimed_bidders', [])
         self.highest_bid_amount: int = auction_data.get('highest_bid_amount')
         self.bids: list[Bid] | None = [Bid(bid) for bid in auction_data.get('bids', [])]
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def get_start_time_in_timezone(self, tz: tzinfo) -> datetime | None:
         """
@@ -163,14 +151,8 @@ class AuctionsPage:
         self.page: int = page_data.get('page', 0)
         self.totalPages: int = page_data.get('totalPages', 0)
         self.totalAuctions: int = page_data.get('totalAuctions', 0)
-        self.lastUpdated: datetime | None = self._convert_timestamp(page_data.get('lastUpdated'))
+        self.lastUpdated: datetime | None = convert_timestamp(page_data.get('lastUpdated'))
         self.auctions: list[SkyBlockAuction] = [SkyBlockAuction(auction) for auction in page_data.get('auctions', [])]
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def get_auction_by_id(self, auction_id: str) -> SkyBlockAuction | None:
         """
@@ -367,16 +349,10 @@ class RecentlyEndedAuction:
         self.seller_profile: str = auction_data.get('seller_profile')
         self.buyer: str = auction_data.get('buyer')
         self.buyer_profile: str = auction_data.get('buyer_profile')
-        self.timestamp: datetime | None = self._convert_timestamp(auction_data.get('timestamp'))
+        self.timestamp: datetime | None = convert_timestamp(auction_data.get('timestamp'))
         self.price: int = auction_data.get('price')
         self.bin: bool = auction_data.get('bin', False)
         self.item_bytes: str = auction_data.get('item_bytes')
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def __str__(self) -> str:
         auction_type = "BIN" if self.bin else "Auction"
@@ -407,19 +383,13 @@ class RecentlyEndedAuctions:
             response.raise_for_status()
             data = response.json()
             if data.get('success'):
-                self.last_updated = self._convert_timestamp(data.get('lastUpdated'))
+                self.last_updated = convert_timestamp(data.get('lastUpdated'))
                 auctions_data = data.get('auctions', [])
                 self.auctions = [RecentlyEndedAuction(auction_data) for auction_data in auctions_data]
             else:
                 raise ValueError("API response was not successful")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred while fetching recently ended auctions: {e}")
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def get_auction_by_id(self, auction_id: str) -> RecentlyEndedAuction | None:
         """
@@ -488,38 +458,6 @@ class PlayerAuctions:
         if timestamp:
             return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
         return None
-
-    def _get_uuid_from_username(self, username: str) -> str:
-        """
-        Fetch the UUID of a player from their username using the Mojang API.
-        TODO:(This method may eventually need to migrate to some more general spot. 
-            Not sure how often we may reuse something like this yet)
-
-        Args:
-            username (str): The username of the player.
-
-        Returns:
-            str: The UUID of the player without dashes.
-
-        Raises:
-            ValueError: If the username does not exist.
-            ConnectionError: If there's an error contacting the Mojang API.
-        """
-        try:
-            response = requests.get(MOJANG_API_URL + username)
-            if response.status_code == 204:
-                raise ValueError(f"Username '{username}' does not exist.")
-            response.raise_for_status()
-            data = response.json()
-            uuid = data.get('id')
-            if uuid:
-                return uuid
-            else:
-                raise ValueError(f"UUID not found for username '{username}'.")
-        except requests.exceptions.HTTPError as e:
-            raise ConnectionError(f"HTTP Error while fetching UUID for username '{username}': {e}")
-        except requests.exceptions.RequestException as e:
-            raise ConnectionError(f"An error occurred while fetching UUID for username '{username}': {e}")
 
     def get_auction_by_uuid(self, auction_uuid: str) -> SkyBlockAuction | None:
         """
@@ -691,7 +629,7 @@ class PlayerAuctions:
             ConnectionError: If there's a network-related error.
         """
         try:
-            player_uuid = self._get_uuid_from_username(username)
+            player_uuid = get_uuid_from_username(username)
             return self.get_auctions_by_player_uuid(player_uuid)
         except ValueError as ve:
             raise ve
