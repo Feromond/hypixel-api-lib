@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from hypixel_api_lib.utils import convert_timestamp
 
 class SlotTuning:
     """
@@ -25,15 +26,8 @@ class SlotTuning:
         self.critical_chance: int = data.get('critical_chance', 0)
         self.attack_speed: int = data.get('attack_speed', 0)
         self.intelligence: int = data.get('intelligence', 0)
-        self.purchase_ts: datetime | None = self._convert_timestamp(data.get('purchase_ts'))
+        self.purchase_ts: datetime | None = convert_timestamp(data.get('purchase_ts'))
         self.refund: bool = data.get('refund', False)
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def __str__(self) -> str:
         purchase_str = self.purchase_ts.strftime('%Y-%m-%d %H:%M:%S') if self.purchase_ts else 'N/A'
