@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from hypixel_api_lib.utils import convert_timestamp
 from .PlayerData import PlayerData
 from .GlacitePlayerData import GlacitePlayerData
 from .Events import Events
@@ -20,14 +21,7 @@ class DeletionNotice:
     """
 
     def __init__(self, data: dict) -> None:
-        self.timestamp: datetime | None = self._convert_timestamp(data.get('timestamp'))
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
+        self.timestamp: datetime | None = convert_timestamp(data.get('timestamp'))
 
     def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
