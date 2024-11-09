@@ -1,6 +1,7 @@
 import requests
-from datetime import datetime, timezone
+from datetime import datetime
 from .member.ProfileMember import SkyBlockProfileMember
+from hypixel_api_lib.utils import convert_timestamp
 
 PROFILE_API_URL = r"https://api.hypixel.net/v2/skyblock/profile"
 PROFILES_API_URL = r"https://api.hypixel.net/v2/skyblock/profiles"
@@ -23,18 +24,11 @@ class CommunityUpgradeState:
     def __init__(self, data: dict) -> None:
         self.upgrade: str = data.get('upgrade')
         self.tier: int = data.get('tier')
-        self.started_ms: datetime | None = self._convert_timestamp(data.get('started_ms'))
+        self.started_ms: datetime | None = convert_timestamp(data.get('started_ms'))
         self.started_by: str = data.get('started_by')
-        self.claimed_ms: datetime | None = self._convert_timestamp(data.get('claimed_ms'))
+        self.claimed_ms: datetime | None = convert_timestamp(data.get('claimed_ms'))
         self.claimed_by: str = data.get('claimed_by')
         self.fasttracked: bool = data.get('fasttracked', False)
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def __str__(self) -> str:
         return f"Upgrade: {self.upgrade}, Tier: {self.tier}, Fasttracked: {self.fasttracked}"
@@ -75,17 +69,10 @@ class BankTransaction:
     """
 
     def __init__(self, data: dict) -> None:
-        self.timestamp: datetime | None = self._convert_timestamp(data.get('timestamp'))
+        self.timestamp: datetime | None = convert_timestamp(data.get('timestamp'))
         self.action: str = data.get('action')
         self.initiator_name: str = data.get('initiator_name')
         self.amount: float = data.get('amount')
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def __str__(self) -> str:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'

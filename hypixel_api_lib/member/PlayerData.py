@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from hypixel_api_lib.utils import convert_timestamp
 
 class Perk:
     """
@@ -60,7 +61,7 @@ class PlayerData:
 
     def __init__(self, data: dict) -> None:
         self.visited_zones: list = data.get('visited_zones', [])
-        self.last_death: datetime | None = self._convert_timestamp(data.get('last_death'))
+        self.last_death: datetime | None = convert_timestamp(data.get('last_death'))
         self.perks: dict[str,int] = self._parse_perks(data.get('perks', {}))
         self.active_effects: list = data.get('active_effects', [])
         self.paused_effects: list = data.get('paused_effects', [])
@@ -74,13 +75,6 @@ class PlayerData:
         self.fastest_target_practice: float | None = data.get('fastest_target_practice', None)
         self.fishing_treasure_caught: int = data.get('fishing_treasure_caught', 0)
         self.experience: dict[str,float] = self._parse_experience(data.get('experience', {}))
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
     
     def _parse_perks(self, perks_dict:dict) -> list[Perk]:
         """Convert the perks dictionary into a list of Perk objects."""

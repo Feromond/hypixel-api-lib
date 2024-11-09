@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
 import requests
+from hypixel_api_lib.utils import convert_timestamp
 
 FIRE_SALES_API_URL = "https://api.hypixel.net/skyblock/firesales"
 
@@ -17,16 +18,10 @@ class FireSaleItem:
 
     def __init__(self, sale_data: dict) -> None:
         self.item_id: str = sale_data.get('item_id')
-        self.start: datetime | None = self._convert_timestamp(sale_data.get('start'))
-        self.end: datetime | None = self._convert_timestamp(sale_data.get('end'))
+        self.start: datetime | None = convert_timestamp(sale_data.get('start'))
+        self.end: datetime | None = convert_timestamp(sale_data.get('end'))
         self.amount: int = sale_data.get('amount')
         self.price: int = sale_data.get('price')
-
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def is_active(self) -> bool:
         """

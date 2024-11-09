@@ -1,6 +1,7 @@
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, tzinfo
 import re
 import requests
+from hypixel_api_lib.utils import convert_timestamp
 
 BINGO_EVENT_API_URL = r"https://api.hypixel.net/resources/skyblock/bingo"
 
@@ -93,17 +94,11 @@ class BingoEvent:
     def __init__(self, event_data: dict) -> None:
         self.id: int | None = event_data.get('id')
         self.name: str = event_data.get('name')
-        self.start: datetime | None = self._convert_timestamp(event_data.get('start'))
-        self.end: datetime | None = self._convert_timestamp(event_data.get('end'))
+        self.start: datetime | None = convert_timestamp(event_data.get('start'))
+        self.end: datetime | None = convert_timestamp(event_data.get('end'))
         self.modifier: str | None = event_data.get('modifier')
         self.goals: list[BingoGoal] = [BingoGoal(goal) for goal in event_data.get('goals', [])]
 
-    def _convert_timestamp(self, timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
-    
     def get_start_time_in_timezone(self, tz: tzinfo) -> datetime | None:
         """
         Get the start time converted to the specified time zone.

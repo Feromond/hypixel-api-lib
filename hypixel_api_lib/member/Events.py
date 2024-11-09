@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from hypixel_api_lib.utils import convert_timestamp
 
 class EasterTimeTower:
     """
@@ -13,16 +14,9 @@ class EasterTimeTower:
 
     def __init__(self, data: dict) -> None:
         self.charges: int = data.get('charges', 0)
-        self.activation_time: datetime | None = self._convert_timestamp(data.get('activation_time'))
+        self.activation_time: datetime | None = convert_timestamp(data.get('activation_time'))
         self.level: int = data.get('level', 0)
-        self.last_charge_time: datetime | None = self._convert_timestamp(data.get('last_charge_time'))
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
+        self.last_charge_time: datetime | None = convert_timestamp(data.get('last_charge_time'))
 
     def __str__(self) -> str:
         activation_time_str = self.activation_time.strftime('%Y-%m-%d %H:%M:%S') if self.activation_time else 'N/A'
@@ -120,7 +114,7 @@ class EasterEvent:
         self.rabbits_data: EasterRabbitsData = EasterRabbitsData(data.get('rabbits', {}))
         self.shop: EasterShop = EasterShop(data.get('shop', {}))
         self.employees: EasterEmployees = EasterEmployees(data.get('employees', {}))
-        self.last_viewed_chocolate_factory: datetime | None = self._convert_timestamp(data.get('last_viewed_chocolate_factory'))
+        self.last_viewed_chocolate_factory: datetime | None = convert_timestamp(data.get('last_viewed_chocolate_factory'))
         self.rabbit_barn_capacity_level: int = data.get('rabbit_barn_capacity_level', 0)
         self.chocolate_level: int = data.get('chocolate_level', 0)
         self.time_tower: EasterTimeTower = EasterTimeTower(data.get('time_tower', {}))
@@ -130,13 +124,6 @@ class EasterEvent:
         self.chocolate_multiplier_upgrades: int = data.get('chocolate_multiplier_upgrades', 0)
         self.click_upgrades: int = data.get('click_upgrades', 0)
         self.rabbit_rarity_upgrades: int = data.get('rabbit_rarity_upgrades', 0)
-
-    @staticmethod
-    def _convert_timestamp(timestamp: int | None) -> datetime | None:
-        """Convert a timestamp in milliseconds to a timezone-aware datetime object in UTC."""
-        if timestamp:
-            return datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc)
-        return None
 
     def __str__(self) -> str:
         return (f"EasterEvent(Chocolate: {self.chocolate}, Total Chocolate: {self.total_chocolate}, "
