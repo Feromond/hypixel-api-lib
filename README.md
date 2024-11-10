@@ -38,10 +38,10 @@ Our goal with `hypixel-api-lib` is to create a comprehensive and efficient libra
 
 ## Directory Information
 
-### **hypixel-api-lib/**
+### **hypixel_api_lib/**
 
 ```sh
-geophysics_lib/
+hypixel_api_lib/
 ├── __init__.py
 ├── Elections.py
 ├── Collections.py
