@@ -2,6 +2,7 @@ from .PlayerClasses import PlayerClasses
 from .DungeonJournal import DungeonJournal
 from .DailyRuns import DailyRuns
 from .DungeonHubRaceSettings import DungeonHubRaceSettings
+from .DungeonTypes import DungeonTypes
 
 class Dungeons():
     """
