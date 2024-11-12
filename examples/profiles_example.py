@@ -6,6 +6,7 @@ load_dotenv()
 
 api_key = os.getenv("HYPIXEL_API_KEY")
 player_uuid = "be5c42d4ea454601a57b944c6413f3cd"  # Feromond
+player_name = "Feromond"
 
 profiles_api = SkyBlockProfiles(api_key)
 
@@ -27,9 +28,9 @@ except Exception as e:
 
 # Fetch the selected profile for the player
 try:
-    selected_profile = profiles_api.get_selected_profile_by_player_uuid(player_uuid)
+    selected_profile = profiles_api.get_selected_profile_by_player_name("Feromond")
     if selected_profile:
-        print(f"Selected profile for player UUID {player_uuid}: {selected_profile}")
+        print(f"Selected profile for player {player_name}: {selected_profile}")
 
         # feromond = selected_profile.get_member(player_uuid)
         # print(feromond.events)
