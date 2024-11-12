@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from .member.ProfileMember import SkyBlockProfileMember
-from hypixel_api_lib.utils import convert_timestamp
+from hypixel_api_lib.utils import convert_timestamp, get_uuid_from_username
 
 PROFILE_API_URL = r"https://api.hypixel.net/v2/skyblock/profile"
 PROFILES_API_URL = r"https://api.hypixel.net/v2/skyblock/profiles"
@@ -265,3 +265,47 @@ class SkyBlockProfiles:
             if profile.selected:
                 return profile
         return None
+
+    def get_profiles_by_player_name(self, username: str) -> list[SkyBlockProfile]:
+        """
+        Fetch profiles by player's username.
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            list[SkyBlockProfile]: List of profiles that the player is part of.
+
+        Raises:
+            ValueError: If the username does not exist or the API response indicates an error.
+            ConnectionError: If there's a network-related error.
+        """
+        try:
+            player_uuid = get_uuid_from_username(username)
+            return self.get_profiles_by_player_uuid(player_uuid)
+        except ValueError as ve:
+            raise ve
+        except ConnectionError as ce:
+            raise ce
+        
+    def get_selected_profile_by_player_name(self, username: str) -> SkyBlockProfile | None:
+        """
+        Fetch currently selected profile by player's username.
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            SkyBlockProfile | None: Currently selected profile of the player if it exists, or None
+
+        Raises:
+            ValueError: If the username does not exist or the API response indicates an error.
+            ConnectionError: If there's a network-related error.
+        """
+        try:
+            player_uuid = get_uuid_from_username(username)
+            return self.get_selected_profile_by_player_uuid(player_uuid)
+        except ValueError as ve:
+            raise ve
+        except ConnectionError as ce:
+            raise ce
