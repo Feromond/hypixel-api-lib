@@ -1,6 +1,7 @@
 from .PlayerClasses import PlayerClasses
 from .DungeonJournal import DungeonJournal
 from .DailyRuns import DailyRuns
+from .DungeonHubRaceSettings import DungeonHubRaceSettings
 
 class Dungeons():
     """
@@ -20,7 +21,7 @@ class Dungeons():
         self.selected_dungeon_class: str | None = dungeons_data.get("selected_dungeon_class", None)
         self.daily_runs: DailyRuns = DailyRuns(dungeons_data.get("daily_runs", {}))
         self.treasures: dict = dungeons_data.get("treasures", {})                               # Huge
-        self.dungeon_hub_race_settings: dict[str,str] = dungeons_data.get("dungeon_hub_race_settings", {}) 
+        self.dungeon_hub_race_settings: DungeonHubRaceSettings =  DungeonHubRaceSettings(dungeons_data.get("dungeon_hub_race_settings", {}))
         self.last_dungeon_run: str | None = dungeons_data.get("last_dungeon_run", None)
         self.secrets: int = dungeons_data.get("secrets", 0)
 
