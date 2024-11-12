@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from .member.ProfileMember import SkyBlockProfileMember
-from hypixel_api_lib.utils import convert_timestamp, get_uuid_from_username
+from hypixel_api_lib.utils import convert_timestamp, get_uuid_from_username, get_username_from_uuid
 
 PROFILE_API_URL = r"https://api.hypixel.net/v2/skyblock/profile"
 PROFILES_API_URL = r"https://api.hypixel.net/v2/skyblock/profiles"
@@ -140,6 +140,29 @@ class SkyBlockProfile:
             SkyBlockProfileMember or None: The member object, or None if not found.
         """
         return self.members.get(uuid)
+    
+    def get_member_by_username(self, username: str) -> SkyBlockProfileMember | None:
+        """
+        Retrieve a member by username
+
+        Args:
+            username (str): The username of the player.
+
+        Returns:
+            SkyBlockProfileMember | None: SkyBlockProfileMember data from the username, or None
+
+        Raises:
+            ValueError: If the username does not exist or the API response indicates an error.
+            ConnectionError: If there's a network-related error.
+        """
+        try:
+            player_uuid = get_uuid_from_username(username)
+            return self.get_member(player_uuid)
+        except ValueError as ve:
+            raise ve
+        except ConnectionError as ce:
+            raise ce        
+
 
     def list_member_uuids(self) -> list[str]:
         """
@@ -149,12 +172,31 @@ class SkyBlockProfile:
             list of str: List of member UUIDs.
         """
         return list(self.members.keys())
+    
+    def list_member_usernames(self) -> list[str]:
+        """
+        List all member usernames in the profile by resolving UUIDs.
+
+        Returns:
+            list of str: List of member usernames.
+        Raises:
+            ValueError: If the UUID does not exist or has no associated username.
+            ConnectionError: If there's an error contacting the Mojang API.
+        """
+        usernames = []
+        for uuid in self.list_member_uuids():
+            try:
+                username = get_username_from_uuid(uuid)
+                usernames.append(username)
+            except Exception as e:
+                print(f"Could not retrieve username for UUID {uuid}: {e}")
+        return usernames
 
     def __str__(self) -> str:
         cute_name_str = f", Cute Name: {self.cute_name}" if self.cute_name else ""
         selected_str = ", Selected" if self.selected else ""
         game_mode_str = f", Game Mode: {self.game_mode}" if self.game_mode else ""
-        return f"SkyBlockProfile ID: {self.profile_id}{cute_name_str}{selected_str}{game_mode_str}, Members: {self.list_member_uuids()}"
+        return f"SkyBlockProfile ID: {self.profile_id}{cute_name_str}{selected_str}{game_mode_str}, Members: {self.list_member_usernames()}"
 
 
 class SkyBlockProfiles:
