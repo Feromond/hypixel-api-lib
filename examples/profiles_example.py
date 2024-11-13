@@ -32,8 +32,9 @@ try:
     if selected_profile:
         print(f"Selected profile for player {player_name}: {selected_profile}")
 
-        # feromond = selected_profile.get_member(player_uuid)
-        # print(feromond.events)
+        feromond = selected_profile.get_member_by_username(player_name)
+        print(feromond.dungeons)
+        print(feromond.dungeons.dungeon_types.master_catacombs.most_damage_berserk)
     else:
         print(f"No selected profile found for player UUID {player_uuid}")
 except Exception as e:
