@@ -18,6 +18,7 @@ from .Experimentation import Experimentation
 from .MiningCore import MiningCore
 from .Bestiary import Bestiary
 from .Quests import Quests
+from .PlayerStats import PlayerStats
 
 class DeletionNotice:
     """
@@ -96,7 +97,7 @@ class SkyBlockProfileMember:
         self.mining_core: MiningCore = MiningCore(data.get('mining_core', {}))
         self.bestiary: Bestiary = Bestiary(data.get('bestiary', {}))
         self.quests: Quests = Quests(data.get('quests', {}))
-        self.player_stats: dict = data.get('player_stats', {})
+        self.player_stats: PlayerStats = PlayerStats(data.get('player_stats', {}))
         self.winter_player_data: dict = data.get('winter_player_data', {})
         self.forge: dict = data.get('forge', {})
         self.fairy_soul: dict = data.get('fairy_soul', {})
