@@ -1,4 +1,4 @@
-class DailyRuns():
+class DailyRuns:
     """
     DailyRuns data class to handle the dungeon daily runs component
 

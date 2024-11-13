@@ -1,4 +1,4 @@
-class DungeonJournal():
+class DungeonJournal:
     """
     DungeonJournal data class to handle the data within the dungeon journals.
 

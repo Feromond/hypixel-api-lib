@@ -1,4 +1,4 @@
-class DungeonHubRaceSettings():
+class DungeonHubRaceSettings:
     """
     The DungeonHubRaceSettings dataclass storing data related to the dungeon hub race settings
 

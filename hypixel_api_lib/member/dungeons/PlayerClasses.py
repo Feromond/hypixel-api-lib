@@ -1,4 +1,4 @@
-class ClassExperience():
+class ClassExperience:
     """
     Represents a specific dungeon class experience.
 
@@ -11,7 +11,7 @@ class ClassExperience():
     def __str__(self) -> str:
         return f"Experience: {self.experience}"
 
-class PlayerClasses():
+class PlayerClasses:
     """
     All dungeons player classes
 

@@ -4,7 +4,7 @@ from .DailyRuns import DailyRuns
 from .DungeonHubRaceSettings import DungeonHubRaceSettings
 from .DungeonTypes import DungeonTypes
 
-class Dungeons():
+class Dungeons:
     """
     The dungeons class to handle and store all dungeon related data for a SkyBlockProfileMember
 
