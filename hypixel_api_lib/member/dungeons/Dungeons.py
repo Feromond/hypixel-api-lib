@@ -15,7 +15,7 @@ class Dungeons:
     def __init__(self, dungeons_data: dict) -> None:
         self.dungeons_data = dungeons_data
 
-        self.dungeon_types: dict = dungeons_data.get("dungeon_types", {})                       # Huge
+        self.dungeon_types: dict = DungeonTypes(dungeons_data.get("dungeon_types", {})   )                   # Huge
         self.player_classes: PlayerClasses = PlayerClasses(dungeons_data.get("player_classes", {})) 
         self.dungeon_journal: DungeonJournal = DungeonJournal(dungeons_data.get("dungeon_journal", {}))
         self.dungeons_blah_blah: list[str] = dungeons_data.get("dungeons_blah_blah", [])
