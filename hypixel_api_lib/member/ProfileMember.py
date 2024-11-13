@@ -16,6 +16,7 @@ from .Profile import Profile
 from .NetherIslandPlayerData import NetherIslandPlayerData
 from .Experimentation import Experimentation
 from .MiningCore import MiningCore
+from .Bestiary import Bestiary
 
 class DeletionNotice:
     """
@@ -92,7 +93,7 @@ class SkyBlockProfileMember:
         self.nether_island_player_data: NetherIslandPlayerData = NetherIslandPlayerData(data.get('nether_island_player_data', {}))
         self.experimentation: Experimentation = Experimentation(data.get('experimentation', {}))
         self.mining_core: MiningCore = MiningCore(data.get('mining_core', {}))
-        self.bestiary: dict = data.get('bestiary', {})
+        self.bestiary: Bestiary = Bestiary(data.get('bestiary', {}))
         self.quests: dict = data.get('quests', {})
         self.player_stats: dict = data.get('player_stats', {})
         self.winter_player_data: dict = data.get('winter_player_data', {})
