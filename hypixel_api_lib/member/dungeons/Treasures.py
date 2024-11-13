@@ -60,7 +60,11 @@ class RewardItem:
             self.type = data
 
     def __repr__(self) -> str:
-        return f"<RewardItem type={self.type}, tier={self.tier}>"
+        return f"<RewardItem type='{self.type}', tier={self.tier}>"
+
+    def __str__(self) -> str:
+        tier_info = f" Tier {self.tier}" if self.tier is not None else ""
+        return f"{self.type}{tier_info}"
 
 class Rewards:
     """
@@ -71,11 +75,11 @@ class Rewards:
         rolled_rng_meter_randomly (bool): Indicates if the RNG meter was rolled randomly.
     """
     def __init__(self, data: dict) -> None:
-        rewards_list: list = data.get('rewards', [])
+        rewards_list: list[str] = data.get('rewards', [])
         self.rewards: list[RewardItem] = [RewardItem(item) for item in rewards_list]
         self.rolled_rng_meter_randomly: bool = data.get('rolled_rng_meter_randomly', False)
 
-    def __iter__(self): 
+    def __iter__(self):
         return iter(self.rewards)
 
     def __len__(self) -> int:
@@ -83,6 +87,13 @@ class Rewards:
 
     def __getitem__(self, index) -> RewardItem:
         return self.rewards[index]
+
+    def __repr__(self) -> str:
+        return f"<Rewards total_items={len(self.rewards)}, rolled_rng_meter_randomly={self.rolled_rng_meter_randomly}>"
+
+    def __str__(self) -> str:
+        rewards_str = ', '.join(str(reward) for reward in self.rewards)
+        return f"Rewards: [{rewards_str}]"
 
 class Chest:
     """
@@ -109,7 +120,12 @@ class Chest:
         self.rewards: Rewards = Rewards(data.get('rewards', {}))
 
     def __repr__(self) -> str:
-        return f"<Chest treasure_type={self.treasure_type}, quality={self.quality}>"
+        return (f"<Chest id='{self.chest_id}', treasure_type='{self.treasure_type}', "
+                f"quality={self.quality}, paid={self.paid}>")
+
+    def __str__(self) -> str:
+        return (f"Chest ID: {self.chest_id}, Type: {self.treasure_type}, Quality: {self.quality}, "
+                f"Paid: {self.paid}, Rewards: {self.rewards}")
 
 class Chests:
     """
@@ -129,6 +145,12 @@ class Chests:
 
     def __getitem__(self, index) -> Chest:
         return self.chests[index]
+
+    def __repr__(self) -> str:
+        return f"<Chests total={len(self.chests)}>"
+
+    def __str__(self) -> str:
+        return f"Chests Collection with {len(self.chests)} chests"
 
 class Participant:
     """
@@ -179,9 +201,13 @@ class Participant:
         if match:
             return int(match.group(1))
         return 0
-    
+
     def __repr__(self) -> str:
-        return f"Participants Name: {self.name}, Class: {self.player_class}, Level: {self.level}"
+        return (f"<Participant uuid='{self.player_uuid}', name='{self.name}', "
+                f"class='{self.player_class}', level={self.level}>")
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.player_class} Level {self.level})"
 
 class Run:
     """
@@ -209,6 +235,15 @@ class Run:
         """
         return convert_timestamp(self.completion_ts)
 
+    def __repr__(self) -> str:
+        return (f"<Run id='{self.run_id}', dungeon='{self.dungeon_type}', "
+                f"tier={self.dungeon_tier}, completion_time='{self.completion_time}'>")
+
+    def __str__(self) -> str:
+        participants_str = ', '.join(str(p) for p in self.participants)
+        return (f"Run ID: {self.run_id}, Dungeon: {self.dungeon_type} Tier {self.dungeon_tier}, "
+                f"Completed at: {self.completion_time}, Participants: [{participants_str}]")
+
 class Runs:
     """
     Represents a collection of dungeon runs.
@@ -228,6 +263,12 @@ class Runs:
     def __getitem__(self, index) -> Run:
         return self.runs[index]
 
+    def __repr__(self) -> str:
+        return f"<Runs total={len(self.runs)}>"
+
+    def __str__(self) -> str:
+        return f"Runs Collection with {len(self.runs)} runs"
+
 class Treasures:
     """
     Represents the treasures component, including runs and chests.
@@ -239,3 +280,9 @@ class Treasures:
     def __init__(self, data: dict[str,list[dict]]) -> None:
         self.runs: Runs = Runs(data.get("runs", []))
         self.chests: Chests = Chests(data.get("chests", []))
+
+    def __repr__(self) -> str:
+        return f"<Treasures runs={len(self.runs)}, chests={len(self.chests)}>"
+
+    def __str__(self) -> str:
+        return f"Treasures with {len(self.runs)} runs and {len(self.chests)} chests"
