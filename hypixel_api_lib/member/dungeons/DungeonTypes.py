@@ -48,6 +48,12 @@ class DungeonRun:
                 f"Damage Mitigated: {self.damage_mitigated}, Ally Healing: {self.ally_healing}")
 
 class DungeonRuns:
+    """
+    The DungeonRuns class stores a collection of DungeonRun objects.
+    
+    Attributes:
+        dungeon_runs (list[DungeonRun]): A list of DungeonRun objects representing individual runs.
+    """
     def __init__(self, list_of_runs: list[dict]) -> None:
         self.dungeon_runs = []
         for run in list_of_runs:
@@ -76,11 +82,23 @@ class FloorStats:
         self.floor7: float = data.get("7", 0.0)
 
 class BestStats(FloorStats):
+    """
+    BestStats class extends FloorStats to include the best recorded stat across all floors.
+    
+    Attributes:
+        best (float): The highest value recorded across all floors.
+    """
     def __init__(self, data: dict[str,float]) -> None:
         super().__init__(data)
         self.best: float = data.get("best", None)
     
 class TotalStats(FloorStats):
+    """
+    TotalStats class extends FloorStats to include the total stat value for all floors combined.
+
+    Attributes:
+        total (float): The combined total across all floors.
+    """
     def __init__(self, data: dict[str,float]) -> None:
         super().__init__(data)
         self.total: float = data.get("total", None)
@@ -152,6 +170,50 @@ class TimesPlayedCatacombs(TotalStats):
 
 
 class Catacombs:
+    """
+    The Catacombs class stores data related to Catacombs dungeon statistics. 
+    This includes a wide range of metrics tracked across various floors 
+    within the Catacombs dungeon, such as times played, experience earned, 
+    best scores, mob kills, and damage dealt by different classes.
+
+    Attributes:
+        times_played (TimesPlayedCatacombs): Tracks the total play counts for each floor, 
+            including the total number of runs across all floors.
+        experience (float): Total experience points earned in the Catacombs dungeon.
+        best_score (BestScore): The highest score achieved on each floor, with the best score recorded.
+        mobs_killed (MobsKilled): Tracks the cumulative number of mobs killed per floor, 
+            including the total for all floors.
+        most_mobs_killed (MostMobsKilled): The highest number of mobs killed in a single run 
+            for each floor, as well as the highest single run across all floors.
+        most_damage_berserk (MostDamageBerserk): Records the highest damage dealt 
+            by a player in the Berserk class on each floor and overall.
+        most_healing (MostHealing): Records the highest amount of healing done 
+            on each floor by any player class, as well as the highest recorded.
+        tier_completions (TierCompletions): Tracks the number of tier completions for each floor 
+            and the total number of tiers completed.
+        fastest_time (FastestTime): Tracks the fastest completion time for each floor, 
+            as well as the fastest time overall.
+        best_runs (BestRuns): A collection of DungeonRuns objects representing the best runs 
+            for each floor.
+        watcher_kills (WatcherKills): Records the total number of Watcher mobs killed 
+            on each floor and in total.
+        highest_tier_completed (int | None): The highest Catacombs tier that has been completed, 
+            if available.
+        fastest_time_s (FastestTimeS): The fastest completion time with an S rank on each floor 
+            and overall.
+        most_damage_mage (MostDamageMage): Records the highest damage dealt by a Mage 
+            on each floor and overall.
+        most_damage_tank (MostDamageTank): Records the highest damage dealt by a Tank 
+            on each floor and overall.
+        fastest_time_s_plus (FastestTimeSPlus): The fastest completion time with an S+ rank 
+            on each floor and overall.
+        most_damage_archer (MostDamageArcher): Records the highest damage dealt by an Archer 
+            on each floor and overall.
+        most_damage_healer (MostDamageHealer): Records the highest damage dealt by a Healer 
+            on each floor and overall.
+        milestone_completions (MilestoneCompletions): Tracks the milestone completions for each floor 
+            and the total milestone completions across all floors.
+    """
     def __init__(self, data:dict) -> None:
         self.times_played: TimesPlayedCatacombs = TimesPlayedCatacombs(data.get("times_played", {}))
         self.experience: float = data.get("experience", 0.0)
@@ -177,6 +239,38 @@ class Catacombs:
 
 
 class MasterCatacombs:
+    """
+    The MasterCatacombs class stores data specific to the Master Catacombs dungeon. 
+    This dungeon is a more challenging version of the Catacombs, with similar metrics 
+    being tracked. It records performance in areas like damage dealt, mobs killed, 
+    and fastest times, across multiple floors.
+
+    Attributes:
+        tier_completions (TierCompletions): The number of tier completions per floor 
+            and total for all floors.
+        milestone_completions (MilestoneCompletions): Tracks the milestone completions per floor 
+            and the total milestone completions for all floors.
+        best_score (BestScore): The best score achieved on each floor, as well as the highest overall.
+        mobs_killed (MobsKilled): The cumulative number of mobs killed on each floor and in total.
+        most_mobs_killed (MostMobsKilled): The highest single-run mob kill count on each floor 
+            and overall.
+        most_damage_berserk (MostDamageBerserk): The highest damage dealt by a Berserk 
+            on each floor and in total.
+        most_healing (MostHealing): The maximum healing done on each floor and the highest recorded.
+        fastest_time (FastestTime): The fastest completion time for each floor and overall.
+        highest_tier_completed (int | None): The highest tier completed in Master Catacombs, if available.
+        fastest_time_s (FastestTimeS): The fastest time with an S rank on each floor and overall.
+        best_runs (BestRuns): A collection of DungeonRuns objects representing the best runs 
+            for each floor.
+        most_damage_mage (MostDamageMage): Records the highest damage dealt by a Mage 
+            on each floor and overall.
+        most_damage_archer (MostDamageArcher): Records the highest damage dealt by an Archer 
+            on each floor and overall.
+        fastest_time_s_plus (FastestTimeSPlus): The fastest time with an S+ rank on each floor 
+            and overall.
+        most_damage_healer (MostDamageHealer): Records the highest damage dealt by a Healer 
+            on each floor and overall.
+    """
     def __init__(self, data: dict) -> None:
         self.tier_completions: TierCompletions = TierCompletions(data.get("tier_completions", {}))
         self.milestone_completions: MilestoneCompletions = MilestoneCompletions(data.get("milestone_completions", {}))
@@ -193,14 +287,20 @@ class MasterCatacombs:
         self.most_damage_archer: MostDamageArcher = MostDamageArcher(data.get("most_damage_archer", {}))
         self.fastest_time_s_plus: FastestTimeSPlus = FastestTimeSPlus(data.get("fastest_time_s_plus", {}))
         self.most_damage_healer: MostDamageHealer = MostDamageHealer(data.get("most_damage_healer", {}))
-        
-"""
-Master Catacombs
- 'most_damage_mage', 'most_damage_archer', 'fastest_time_s_plus', 'most_damage_healer'])
-"""
-
 
 class DungeonTypes:
+    """
+    The DungeonTypes class encapsulates data for different types of dungeons 
+    in the game. Specifically, it contains data for the standard Catacombs dungeon 
+    and the more challenging Master Catacombs.
+
+    Attributes:
+        catacombs (Catacombs): An instance of the Catacombs class containing 
+            detailed stats and metrics for the standard Catacombs dungeon.
+        master_catacombs (MasterCatacombs): An instance of the MasterCatacombs class 
+            containing stats and metrics for the Master Catacombs dungeon, 
+            which is more challenging.
+    """
     def __init__(self, data: dict) -> None:
         self.catacombs: dict = Catacombs(data.get("catacombs", {}))
         self.master_catacombs: dict = MasterCatacombs(data.get("master_catacombs", {}))
