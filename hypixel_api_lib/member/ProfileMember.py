@@ -12,6 +12,7 @@ from .ItemData import ItemData
 from .JacobsContest import JacobsContestData
 from .Currencies import Currencies
 from .dungeons import Dungeons
+from .Profile import Profile
 
 class DeletionNotice:
     """
@@ -81,7 +82,7 @@ class SkyBlockProfileMember:
         self.jacobs_contest: JacobsContestData = JacobsContestData(data.get('jacobs_contest', {}))
         self.currencies: Currencies = Currencies(data.get('currencies', {}))
         self.dungeons: Dungeons = Dungeons(data.get('dungeons', {}))
-        self.profile: dict = data.get('profile', {})
+        self.profile: Profile = Profile(data.get('profile', {}))
         self.deleted_member: bool = self.is_member_deleted()
         self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.get("deletion_notice")) if self.deleted_member else None
         self.player_id: str = data.get('player_id')
