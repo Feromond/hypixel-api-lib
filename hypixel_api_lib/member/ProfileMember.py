@@ -13,6 +13,7 @@ from .JacobsContest import JacobsContestData
 from .Currencies import Currencies
 from .dungeons import Dungeons
 from .Profile import Profile
+from .NetherIslandPlayerData import NetherIslandPlayerData
 
 class DeletionNotice:
     """
@@ -86,7 +87,7 @@ class SkyBlockProfileMember:
         self.deleted_member: bool = self.is_member_deleted()
         self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.deletion_notice) if self.deleted_member else None
         self.player_id: str = data.get('player_id')
-        self.nether_island_player_data: dict = data.get('nether_island_player_data', {})
+        self.nether_island_player_data: NetherIslandPlayerData = NetherIslandPlayerData(data.get('nether_island_player_data', {}))
         self.experimentation: dict = data.get('experimentation', {})
         self.mining_core: dict = data.get('mining_core', {})
         self.bestiary: dict = data.get('bestiary', {})
