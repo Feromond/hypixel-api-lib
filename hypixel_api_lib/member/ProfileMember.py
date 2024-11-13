@@ -84,7 +84,7 @@ class SkyBlockProfileMember:
         self.dungeons: Dungeons = Dungeons(data.get('dungeons', {}))
         self.profile: Profile = Profile(data.get('profile', {}))
         self.deleted_member: bool = self.is_member_deleted()
-        self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.get("deletion_notice")) if self.deleted_member else None
+        self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.deletion_notice) if self.deleted_member else None
         self.player_id: str = data.get('player_id')
         self.nether_island_player_data: dict = data.get('nether_island_player_data', {})
         self.experimentation: dict = data.get('experimentation', {})
@@ -104,7 +104,7 @@ class SkyBlockProfileMember:
 
     def is_member_deleted(self) -> bool:
         """Check if the current member has been marked as deleted in this profile"""
-        if self.profile.get("deletion_notice"):
+        if self.profile.deletion_notice:
             return True
         return False
 
