@@ -173,15 +173,35 @@ class Catacombs: #TODO test all these to verify
         self.most_damage_healer: MostDamageHealer = MostDamageHealer(data.get("most_damage_healer", {}))
         self.milestone_completions: MilestoneCompletions = MilestoneCompletions(data.get("milestone_completions", {}))
 
+
+
+
+class MasterCatacombs:
+    def __init__(self, data: dict) -> None:
+        self.tier_completions: TierCompletions = TierCompletions(data.get("tier_completions", {}))
+        self.milestone_completions: MilestoneCompletions = MilestoneCompletions(data.get("milestone_completions", {}))
+        self.best_score: BestScore = BestScore(data.get("best_score", {}))
+        self.mobs_killed: MobsKilled = MobsKilled(data.get("mobs_killed", {}))
+        self.most_mobs_killed: MostMobsKilled = MostMobsKilled(data.get("most_mobs_killed", {}))
+        self.most_damage_berserk: MostDamageBerserk = MostDamageBerserk(data.get("most_damage_berserk", {}))
+        self.most_healing: MostHealing = MostHealing(data.get("most_healing", {}))
+        self.fastest_time: FastestTime = FastestTime(data.get("fastest_time", {}))
+        self.highest_tier_completed: int | None = data.get("highest_tier_completed", None)
+        self.fastest_time_s: FastestTimeS = FastestTimeS(data.get("fastest_time_s", {}))
+        self.best_runs: BestRuns = BestRuns(data.get("best_runs", {}))
+        self.most_damage_mage: MostDamageMage = MostDamageMage(data.get("most_damage_mage", {}))
+        self.most_damage_archer: MostDamageArcher = MostDamageArcher(data.get("most_damage_archer", {}))
+        self.fastest_time_s_plus: FastestTimeSPlus = FastestTimeSPlus(data.get("fastest_time_s_plus", {}))
+        self.most_damage_healer: MostDamageHealer = MostDamageHealer(data.get("most_damage_healer", {}))
+        
 """
 Master Catacombs
-dict_keys(['tier_completions', 'milestone_completions', 'best_score', 'mobs_killed', 'most_mobs_killed', 'most_damage_berserk', 'most_healing', 'fastest_time', 'highest_tier_completed', 'fastest_time_s', 'best_runs', 'most_damage_mage', 'most_damage_archer', 'fastest_time_s_plus', 'most_damage_healer'])
+ 'most_damage_mage', 'most_damage_archer', 'fastest_time_s_plus', 'most_damage_healer'])
 """
-
 
 
 class DungeonTypes:
     def __init__(self, data: dict) -> None:
         self.catacombs: dict = Catacombs(data.get("catacombs", {}))
-        self.master_catacombs: dict = data.get("master_catacombs")
+        self.master_catacombs: dict = MasterCatacombs(data.get("master_catacombs", {}))
 
