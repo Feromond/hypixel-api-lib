@@ -52,19 +52,17 @@ class DungeonRuns:
         self.dungeon_runs = []
         for run in list_of_runs:
             self.dungeon_runs.append(DungeonRun(run))
-            
-
+         
 class BestRuns:
     def __init__(self, data: dict[str,dict]) -> None:
-        self.floor0: list[dict] = data.get("0", [])
-        self.floor1: list[dict] = data.get("1", [])
-        self.floor2: list[dict] = data.get("2", [])
-        self.floor3: list[dict] = data.get("3", [])
-        self.floor4: list[dict] = data.get("4", [])
-        self.floor5: list[dict] = data.get("5", [])
-        self.floor6: list[dict] = data.get("6", [])
-        self.floor7: list[dict] = data.get("7", [])
-    
+        self.floor0: DungeonRuns = DungeonRuns(data.get("0", []))
+        self.floor1: DungeonRuns = DungeonRuns(data.get("1", []))
+        self.floor2: DungeonRuns = DungeonRuns(data.get("2", []))
+        self.floor3: DungeonRuns = DungeonRuns(data.get("3", []))
+        self.floor4: DungeonRuns = DungeonRuns(data.get("4", []))
+        self.floor5: DungeonRuns = DungeonRuns(data.get("5", []))
+        self.floor6: DungeonRuns = DungeonRuns(data.get("6", []))
+        self.floor7: DungeonRuns = DungeonRuns(data.get("7", []))
 
 class FloorStats:
     def __init__(self, data: dict[str,float]) -> None:
@@ -80,20 +78,40 @@ class FloorStats:
 class BestStats(FloorStats):
     def __init__(self, data: dict[str,float]) -> None:
         super().__init__(data)
-        self.best: float = data.get("best")
+        self.best: float = data.get("best", None)
     
 class TotalStats(FloorStats):
     def __init__(self, data: dict[str,float]) -> None:
         super().__init__(data)
-        self.total: float = data.get("total")
+        self.total: float = data.get("total", None)
 
+class MilestoneCompletions(TotalStats):
+    def __str__(self) -> str:
+        return f"Milestones Completed In Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, Total: {self.total}"
+
+class MostDamageHealer(BestStats):
+    def __str__(self) -> str:
+        return f"Most Healer Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
+
+class MostDamageArcher(BestStats):
+    def __str__(self) -> str:
+        return f"Most Archer Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
+
+class FastestTimeSPlus(BestStats):
+    def __str__(self) -> str:
+        return f"Fastest S+ Times for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
+
+class MostDamageTank(BestStats):
+    def __str__(self) -> str:
+        return f"Most Tank Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
+    
 class MostDamageMage(BestStats):
     def __str__(self) -> str:
         return f"Most Mage Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
 
-class FastestTimeS(FloorStats):
+class FastestTimeS(BestStats):
     def __str__(self) -> str:
-        return f"Fastest S Times for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}"
+        return f"Fastest S Times for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
 
 class WatcherKills(TotalStats):
     def __str__(self) -> str:
@@ -111,9 +129,9 @@ class MostHealing(BestStats):
     def __str__(self) -> str:
         return f"Most Healing for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
 
-class MostDamageBerserk(FloorStats):
+class MostDamageBerserk(BestStats):
     def __str__(self) -> str:
-        return f"Most Berserk Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}"
+        return f"Most Berserk Damage for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, best: {self.best}"
 
 class MostMobsKilled(BestStats):
     def __str__(self) -> str:
@@ -149,11 +167,13 @@ class Catacombs: #TODO test all these to verify
         self.highest_tier_completed: int | None = data.get("highest_tier_completed", None)
         self.fastest_time_s: FastestTimeS = FastestTimeS(data.get("fastest_time_s", {}))
         self.most_damage_mage: MostDamageMage = MostDamageMage(data.get("most_damage_mage", {}))
+        self.most_damage_tank: MostDamageTank = MostDamageTank(data.get("most_damage_tank", {}))
+        self.fastest_time_s_plus: FastestTimeSPlus = FastestTimeSPlus(data.get("fastest_time_s_plus", {}))
+        self.most_damage_archer: MostDamageArcher = MostDamageArcher(data.get("most_damage_archer", {}))
+        self.most_damage_healer: MostDamageHealer = MostDamageHealer(data.get("most_damage_healer", {}))
+        self.milestone_completions: MilestoneCompletions = MilestoneCompletions(data.get("milestone_completions", {}))
 
 """
-Catacombs
- 'most_damage_tank', 'fastest_time_s_plus', 'most_damage_archer', 'most_damage_healer', 'milestone_completions'])
-
 Master Catacombs
 dict_keys(['tier_completions', 'milestone_completions', 'best_score', 'mobs_killed', 'most_mobs_killed', 'most_damage_berserk', 'most_healing', 'fastest_time', 'highest_tier_completed', 'fastest_time_s', 'best_runs', 'most_damage_mage', 'most_damage_archer', 'fastest_time_s_plus', 'most_damage_healer'])
 """
@@ -162,6 +182,6 @@ dict_keys(['tier_completions', 'milestone_completions', 'best_score', 'mobs_kill
 
 class DungeonTypes:
     def __init__(self, data: dict) -> None:
-        self.catacombs: dict = data.get("catacombs", {})
+        self.catacombs: dict = Catacombs(data.get("catacombs", {}))
         self.master_catacombs: dict = data.get("master_catacombs")
 
