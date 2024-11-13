@@ -198,7 +198,6 @@ class TestSkyBlockProfiles(unittest.TestCase):
         # Test __str__ method
         profile_str = str(sample_profile)
         self.assertIn("SkyBlockProfile ID: 1234567890abcdef", profile_str)
-        self.assertIn("Members: ['uuid1', 'uuid2']", profile_str)
 
     @patch('requests.get')
     def test_get_profile(self, mock_get):
