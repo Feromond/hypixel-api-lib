@@ -151,7 +151,7 @@ class TimesPlayedCatacombs(TotalStats):
         return f"Times Played for Entrance: {self.floor0}, Floor 1: {self.floor1}, Floor 2: {self.floor2}, Floor 3: {self.floor3}, Floor 4: {self.floor4}, Floor 5: {self.floor5}, Floor 6: {self.floor6}, Floor 7: {self.floor7}, Total: {self.total}"
 
 
-class Catacombs: #TODO test all these to verify
+class Catacombs:
     def __init__(self, data:dict) -> None:
         self.times_played: TimesPlayedCatacombs = TimesPlayedCatacombs(data.get("times_played", {}))
         self.experience: float = data.get("experience", 0.0)
