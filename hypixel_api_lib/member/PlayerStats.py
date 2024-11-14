@@ -309,7 +309,6 @@ class RaceTime:
     def __str__(self) -> str:
         return f"{self.race_name}: best_time={self.best_time}ms"
 
-
 class RacesStats:
     """
     Represents the player's race statistics.
@@ -447,7 +446,6 @@ class AuctionsStats:
             f"created={self.created}, gold_spent={self.gold_spent}, gold_earned={self.gold_earned})"
         )
 
-
 class Pets:
     """
     Represents the pets player stats for upgrades and milestones that unlock pets (rock or dolphin pet)
@@ -544,23 +542,21 @@ class PlayerStats:
         candy_collected (int): The total amount of candy collected.
         highest_critical_damage (int): The highest critical damage dealt.
         highest_damage (int): The highest damage dealt.
-        kills (Dict[str, int]): Dictionary of mob names and their kill counts.
-        deaths (Dict[str, int]): Dictionary of causes and their death counts.
-        pets (Dict[str, int]): Dictionary of pet-related stats.
-        auctions (Dict[str, int]): Dictionary of auction-related stats.
-        races (Dict[str, Dict[str, int]]): Dictionary of race names and their stats.
-        end_island (Dict[str, int]): Dictionary of End Island stats.
-        gifts (Dict[str, int]): Dictionary of gift-related stats.
-        winter (Dict[str, int]): Dictionary of winter event stats.
-        items_fished (Dict[str, int]): Dictionary of items fished stats.
-        mythos (Dict[str, int]): Dictionary of mythos event stats.
-        sea_creature_kills (Dict[str, int]): Dictionary of sea creature kills.
-        rift (Dict[str, int]): Dictionary of Rift dimension stats.
-        spooky (Dict[str, int]): Dictionary of spooky event stats.
+        kills (dict[str,int]): Dictionary of mob names and their kill counts.
+        deaths (dict[str,int]): Dictionary of causes and their death counts.
+        pets (dict[str,int]): Dictionary of pet-related stats.
+        auctions (dict[str,int]): Dictionary of auction-related stats.
+        races (dict[str,dict[str,int]]): Dictionary of race names and their stats.
+        end_island (dict[str,int]): Dictionary of End Island stats.
+        gifts (dict[str,int]): Dictionary of gift-related stats.
+        winter (dict[str,int]): Dictionary of winter event stats.
+        items_fished (dict[str,int]): Dictionary of items fished stats.
+        mythos (dict[str,int]): Dictionary of mythos event stats.
+        sea_creature_kills (dict[str,int]): Dictionary of sea creature kills.
+        rift (dict[str,int]): Dictionary of Rift dimension stats.
+        spooky (dict[str,int]): Dictionary of spooky event stats.
     """
-    def __init__(self, data: dict) -> None:
-        player_stats = data.get('player_stats', {})
-
+    def __init__(self, player_stats: dict) -> None:
         self.candy_collected: CandyCollected = CandyCollected(player_stats.get('candy_collected', {}))
         self.highest_critical_damage: float = player_stats.get('highest_critical_damage', 0.0)
         self.highest_damage: float = player_stats.get('highest_damage', 0.0)
@@ -631,8 +627,15 @@ class PlayerStats:
         return sorted_deaths[:n]
 
     def __str__(self) -> str:
+        top_kills_str = ', '.join(f"{mob}: {count}" for mob, count in self.top_kills(3))
+        top_deaths_str = ', '.join(f"{cause}: {count}" for cause, count in self.top_deaths(3))
         return (
-            f"PlayerStats(candy_collected={self.candy_collected}, "
-            f"highest_critical_damage={self.highest_critical_damage}, "
-            f"highest_damage={self.highest_damage})"
+            f"PlayerStats:\n"
+            f"  Highest Critical Damage: {self.highest_critical_damage}\n"
+            f"  Highest Damage: {self.highest_damage}\n"
+            f"  Total Kills: {self.total_kills}\n"
+            f"  Total Deaths: {self.total_deaths}\n"
+            f"  Top Kills: {top_kills_str}\n"
+            f"  Top Deaths: {top_deaths_str}\n"
+            f"  Sea Creature Kills: {self.sea_creature_kills}"
         )
