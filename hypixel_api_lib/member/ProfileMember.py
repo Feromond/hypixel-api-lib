@@ -22,6 +22,7 @@ from .PlayerStats import PlayerStats
 from .Slayer import Slayer
 from .TrophyFish import TrophyFishStats
 from .Objectives import Objectives
+from .CollectionsStats import CollectionsStats
 
 class DeletionNotice:
     """
@@ -107,9 +108,9 @@ class SkyBlockProfileMember:
         self.slayer: Slayer = Slayer(data.get('slayer', {}))
         self.trophy_fish: TrophyFishStats = TrophyFishStats(data.get('trophy_fish', {}))
         self.objectives: Objectives = Objectives(data.get('objectives', {}))
-        self.inventory: dict = data.get('inventory', {})
-        self.shared_inventory: dict = data.get('shared_inventory', {})
-        self.collection: dict = data.get('collection', {})
+        self.inventory: dict = data.get('inventory', {}) # TODO: Inventory is HUGE with some kind of NBT data maybe representing items and inventory positions
+        self.shared_inventory: dict = data.get('shared_inventory', {}) # TODO: Maybe a todo, extract some of he data again if needed
+        self.collection: CollectionsStats = CollectionsStats(data.get('collection', {}))
 
     def is_member_deleted(self) -> bool:
         """Check if the current member has been marked as deleted in this profile"""
