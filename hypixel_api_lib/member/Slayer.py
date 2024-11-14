@@ -6,9 +6,9 @@ class SlayerBoss:
     Represents a generic slayer boss with common attributes.
 
     Attributes:
-        claimed_levels (Dict[str, bool]): Dictionary of claimed levels.
-        boss_kills (Dict[int, int]): Dictionary of boss kills per tier.
-        boss_attempts (Dict[int, int]): Dictionary of boss attempts per tier.
+        claimed_levels (dict[str,bool]): Dictionary of claimed levels.
+        boss_kills (dict[int,int]): Dictionary of boss kills per tier.
+        boss_attempts (dict[int,int]): Dictionary of boss attempts per tier.
         xp (int): Total experience gained from this slayer boss.
     """
 
@@ -28,7 +28,7 @@ class SlayerBoss:
             prefix (str): The prefix to look for in keys.
 
         Returns:
-            Dict[int, int]: A dictionary with tier as key and count as value.
+            dict[int,int]: A dictionary with tier as key and count as value.
         """
         result = {}
         for key, value in data.items():
@@ -65,7 +65,7 @@ class SlayerQuest:
         used_armor (bool): Whether special armor was used.
         solo (bool): Whether the quest is solo.
         combat_xp (int): Combat XP gained.
-        recent_mob_kills (List[Dict[str, any]]): Recent mob kills with details.
+        recent_mob_kills (list[dict[str,any]]): Recent mob kills with details.
         last_killed_mob_island (str): The island where the last mob was killed.
     """
 
@@ -95,8 +95,8 @@ class Slayer:
     Represents the player's slayer statistics.
 
     Attributes:
-        slayer_quest (Optional[SlayerQuest]): The current active slayer quest.
-        slayer_bosses (Dict[str, SlayerBoss]): Dictionary of slayer bosses.
+        slayer_quest (SlayerQuest | None): The current active slayer quest.
+        slayer_bosses (dict[str,SlayerBoss]): Dictionary of slayer bosses.
     """
 
     def __init__(self, data: dict) -> None:
