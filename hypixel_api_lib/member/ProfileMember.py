@@ -47,35 +47,37 @@ class SkyBlockProfileMember:
 
     Attributes:
         uuid (str): The UUID of the member.
-        rift (dict): Rift-related data.
-        player_data (dict): General player data.
-        glacite_player_data (dict): Glacite-specific player data.
-        events (dict): Event-related data.
-        garden_player_data (dict): Garden player data.
-        pets_data (dict): Data about pets.
-        accessory_bag_storage (dict): Accessory bag storage data.
-        leveling (dict): Leveling data.
-        item_data (dict): Item data.
-        jacobs_contest (dict): Jacob's contest data.
-        currencies (dict): Currency data.
-        dungeons (dict): Dungeon-related data.
-        profile (dict): Profile data.
+        rift (RiftData): Rift-related data.
+        player_data (PlayerData): General player data.
+        glacite_player_data (GlacitePlayerData): Glacite-specific player data.
+        events (Events): Event-related data.
+        garden_player_data (GardenPlayerData): Garden player data.
+        pets_data (PetsData): Data about pets.
+        accessory_bag_storage (AccessoryBagStorage): Accessory bag storage data.
+        leveling (LevelingData): Leveling data.
+        item_data (ItemData): Item data.
+        jacobs_contest (JacobsContestData): Jacob's contest data.
+        currencies (Currencies): Currency data.
+        dungeons (Dungeons): Dungeon-related data.
+        profile (ProfileStats): Profile statistics data.
+        deleted_member (bool): Indicates if the member has been marked as deleted.
+        deleted_timestamp (DeletionNotice | None): Deletion notice timestamp if member is deleted.
         player_id (str): The player ID.
-        nether_island_player_data (dict): Nether island data.
-        experimentation (dict): Experimentation data.
-        mining_core (dict): Mining core data.
-        bestiary (dict): Bestiary data.
-        quests (dict): Quest data.
-        player_stats (dict): Player statistics.
+        nether_island_player_data (NetherIslandPlayerData): Nether island data.
+        experimentation (Experimentation): Experimentation data.
+        mining_core (MiningCore): Mining core data.
+        bestiary (Bestiary): Bestiary data.
+        quests (Quests): Quest data.
+        player_stats (PlayerStats): Player statistics.
         winter_player_data (dict): Winter event data.
         forge (dict): Forge data.
         fairy_soul (dict): Fairy soul data.
-        slayer (dict): Slayer data.
-        trophy_fish (dict): Trophy fish data.
-        objectives (dict): Objectives data.
-        inventory (dict): Inventory data.
+        slayer (Slayer): Slayer data.
+        trophy_fish (TrophyFishStats): Trophy fish data.
+        objectives (Objectives): Objectives data.
+        inventory (dict): Inventory data containing NBT data representing items and positions.
         shared_inventory (dict): Shared inventory data.
-        collection (dict): Collection data.
+        collection (CollectionsStats): Collection data.
     """
 
     def __init__(self, uuid: str, data: dict) -> None:
@@ -114,9 +116,8 @@ class SkyBlockProfileMember:
 
     def is_member_deleted(self) -> bool:
         """Check if the current member has been marked as deleted in this profile"""
-        if self.profile.deletion_notice:
-            return True
-        return False
+        return bool(self.profile.deletion_notice)
+
 
     def __str__(self) -> str:
         return f"SkyBlockProfileMember UUID: {self.uuid}"
