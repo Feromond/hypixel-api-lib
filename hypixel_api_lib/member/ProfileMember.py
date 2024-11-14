@@ -1,5 +1,5 @@
 from datetime import datetime
-from hypixel_api_lib.utils import convert_timestamp
+from hypixel_api_lib.utils import convert_timestamp, get_username_from_uuid
 from .PlayerData import PlayerData
 from .GlacitePlayerData import GlacitePlayerData
 from .Events import Events
@@ -80,6 +80,7 @@ class SkyBlockProfileMember:
 
     def __init__(self, uuid: str, data: dict) -> None:
         self.uuid: str = uuid
+        self.username: str = get_username_from_uuid(self.uuid)
         self.rift: RiftData = RiftData(data.get('rift', {}))
         self.player_data: PlayerData = PlayerData(data.get('player_data', {}))
         self.glacite_player_data: GlacitePlayerData = GlacitePlayerData(data.get('glacite_player_data', {}))
@@ -118,4 +119,4 @@ class SkyBlockProfileMember:
 
 
     def __str__(self) -> str:
-        return f"SkyBlockProfileMember UUID: {self.uuid}"
+        return f"SkyBlockProfileMember Username: {self.username}, UUID: {self.uuid}"
