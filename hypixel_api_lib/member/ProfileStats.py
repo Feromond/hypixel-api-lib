@@ -1,9 +1,9 @@
 from datetime import datetime
 from hypixel_api_lib.utils import convert_timestamp
 
-class Profile:
+class ProfileStats:
     """
-    Profile component of the SkyBlockProfileMember component within the Profiles Data.
+    Profile Stats component of the SkyBlockProfileMember component within the Profiles Data.
 
     Attributes:
         first_join (datetime): Datetime of when the member first joined the profile (Defaults)
@@ -18,4 +18,4 @@ class Profile:
         self.deletion_notice: dict | None = data.get("deletion_notice", None)
 
     def __repr__(self) -> str:
-        return f"SkyblockProfileMember Profile Details: First Joined: {self.first_join}, Personal Bank Upgrade: {self.personal_bank_upgrade}, Active Cookie Buff: {self.cookie_buff_active}"
+        return f"SkyblockProfileMember Profile Stats Details: First Joined: {self.first_join}, Personal Bank Upgrade: {self.personal_bank_upgrade}, Active Cookie Buff: {self.cookie_buff_active}"
