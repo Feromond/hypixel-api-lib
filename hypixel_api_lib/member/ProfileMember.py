@@ -20,6 +20,7 @@ from .Bestiary import Bestiary
 from .Quests import Quests
 from .PlayerStats import PlayerStats
 from .Slayer import Slayer
+from .TrophyFish import TrophyFishStats
 
 class DeletionNotice:
     """
@@ -103,7 +104,7 @@ class SkyBlockProfileMember:
         self.forge: dict = data.get('forge', {})
         self.fairy_soul: dict = data.get('fairy_soul', {})
         self.slayer: Slayer = Slayer(data.get('slayer', {}))
-        self.trophy_fish: dict = data.get('trophy_fish', {})
+        self.trophy_fish: TrophyFishStats = TrophyFishStats(data.get('trophy_fish', {}))
         self.objectives: dict = data.get('objectives', {})
         self.inventory: dict = data.get('inventory', {})
         self.shared_inventory: dict = data.get('shared_inventory', {})
