@@ -12,13 +12,14 @@ from .ItemData import ItemData
 from .JacobsContest import JacobsContestData
 from .Currencies import Currencies
 from .dungeons import Dungeons
-from .Profile import Profile
+from .ProfileStats import ProfileStats
 from .NetherIslandPlayerData import NetherIslandPlayerData
 from .Experimentation import Experimentation
 from .MiningCore import MiningCore
 from .Bestiary import Bestiary
 from .Quests import Quests
 from .PlayerStats import PlayerStats
+from .Slayer import Slayer
 
 class DeletionNotice:
     """
@@ -88,7 +89,7 @@ class SkyBlockProfileMember:
         self.jacobs_contest: JacobsContestData = JacobsContestData(data.get('jacobs_contest', {}))
         self.currencies: Currencies = Currencies(data.get('currencies', {}))
         self.dungeons: Dungeons = Dungeons(data.get('dungeons', {}))
-        self.profile: Profile = Profile(data.get('profile', {}))
+        self.profile: ProfileStats = ProfileStats(data.get('profile', {}))
         self.deleted_member: bool = self.is_member_deleted()
         self.deleted_timestamp: DeletionNotice | None = DeletionNotice(self.profile.deletion_notice) if self.deleted_member else None
         self.player_id: str = data.get('player_id')
@@ -101,7 +102,7 @@ class SkyBlockProfileMember:
         self.winter_player_data: dict = data.get('winter_player_data', {})
         self.forge: dict = data.get('forge', {})
         self.fairy_soul: dict = data.get('fairy_soul', {})
-        self.slayer: dict = data.get('slayer', {})
+        self.slayer: Slayer = Slayer(data.get('slayer', {}))
         self.trophy_fish: dict = data.get('trophy_fish', {})
         self.objectives: dict = data.get('objectives', {})
         self.inventory: dict = data.get('inventory', {})
