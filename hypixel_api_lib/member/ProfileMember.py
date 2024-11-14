@@ -39,8 +39,6 @@ class DeletionNotice:
         timestamp_str = self.timestamp.strftime('%Y-%m-%d %H:%M:%S') if self.timestamp else 'N/A'
         return f"Deletion Notice at {timestamp_str}"
 
-
-# TODO: Finish profile members and develop all the sub field data classes for them still. (last updated before dungeons)
 class SkyBlockProfileMember:
     """
     Represents a member of a SkyBlock profile.
