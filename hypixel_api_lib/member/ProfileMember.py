@@ -21,6 +21,7 @@ from .Quests import Quests
 from .PlayerStats import PlayerStats
 from .Slayer import Slayer
 from .TrophyFish import TrophyFishStats
+from .Objectives import Objectives
 
 class DeletionNotice:
     """
@@ -105,7 +106,7 @@ class SkyBlockProfileMember:
         self.fairy_soul: dict = data.get('fairy_soul', {})
         self.slayer: Slayer = Slayer(data.get('slayer', {}))
         self.trophy_fish: TrophyFishStats = TrophyFishStats(data.get('trophy_fish', {}))
-        self.objectives: dict = data.get('objectives', {})
+        self.objectives: Objectives = Objectives(data.get('objectives', {}))
         self.inventory: dict = data.get('inventory', {})
         self.shared_inventory: dict = data.get('shared_inventory', {})
         self.collection: dict = data.get('collection', {})
