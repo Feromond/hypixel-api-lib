@@ -80,6 +80,18 @@ class Election:
             Candidate or None: The Candidate object, or None if not found.
         """
         return next((candidate for candidate in self.candidates if candidate.name.lower() == name.lower()), None)
+    
+    def get_candidates_by_votes(self, descending: bool = True) -> list[Candidate]:
+        """
+        Retrieve the list of candidates sorted by their vote counts.
+
+        Args:
+            descending (bool): If True, sorts from most to least votes. If False, sorts from least to most votes.
+
+        Returns:
+            list of Candidate: The sorted list of candidates.
+        """
+        return sorted(self.candidates, key=lambda candidate: candidate.votes, reverse=descending)
 
     def get_ministers(self, mayor_key: str) -> list[tuple[Candidate, list[Perk]]]:
         """
