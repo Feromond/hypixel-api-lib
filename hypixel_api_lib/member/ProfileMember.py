@@ -80,7 +80,12 @@ class SkyBlockProfileMember:
 
     def __init__(self, uuid: str, data: dict) -> None:
         self.uuid: str = uuid
-        self.username: str = get_username_from_uuid(self.uuid)
+        try:
+            self.username: str = get_username_from_uuid(self.uuid)
+        except ConnectionError:
+            self.username : str = "Unknown"
+        except ValueError:
+            self.username : str = "Unknown"
         self.rift: RiftData = RiftData(data.get('rift', {}))
         self.player_data: PlayerData = PlayerData(data.get('player_data', {}))
         self.glacite_player_data: GlacitePlayerData = GlacitePlayerData(data.get('glacite_player_data', {}))
