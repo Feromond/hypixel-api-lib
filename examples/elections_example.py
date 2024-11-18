@@ -1,25 +1,36 @@
-from hypixel_api_lib import Elections
+from hypixel_api_lib.Elections import Elections
 
-e = Elections()
+elections = Elections()
+current_mayor = elections.get_mayor()
+current_election = elections.get_current_election()
 
-# current election candidates in order of votes
-current = e._current
-candidates = sorted([i for i in current._candidates], key = lambda x: x._votes, reverse=True)
-for i in candidates:
-    print(i)
+print(f"Current Mayor: {current_mayor}")
+print(f"Current Election: {current_election}")
 
+# List all candidates in the current election
+for candidate in current_election.candidates:
+    print(candidate)
 
-curr_minister = e._mayor._minister
+print(f"Current Mayor: {current_mayor.name}")
+ministers = current_mayor.get_ministers()
+if ministers:
+    print("Current Ministers and their perks:")
+    for candidate, perks in ministers:
+        print(f"Minister {candidate.name}:")
+        for perk in perks:
+            print(f"  - {perk.name}: {perk.description}")
+else:
+    print("No ministers in the current mayor's term.")
 
-print("Minister name: %s" % curr_minister._name)
-print("Minister perk %s" % curr_minister._perk.description)
+sorted_candidates = current_election.get_candidates_by_votes()
+print(f"Candidates for Election Year {current_election.year} sorted by votes:")
+for candidate in sorted_candidates:
+    print(f"{candidate.name} - {candidate.votes} votes")
 
-# view details of last election
-last = e._mayor._election
-print("Last election year: %d" % last._year)
-candidates = sorted([i for i in last._candidates], key = lambda x: x._votes, reverse=True)
-for i in candidates:
-    print(i)
-
+# Get a candidate by name
+finnegan = current_election.get_candidate_by_name('Finnegan')
+print(f"Candidate Finnegan's perks:")
+for perk in finnegan.perks:
+    print(perk)
 
 
