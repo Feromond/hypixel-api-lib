@@ -365,7 +365,7 @@ class TestSkyBlockProfileMember(unittest.TestCase):
         Test the string representation of SkyBlockProfileMember.
         """
         member = SkyBlockProfileMember(uuid="uuid1", data=self.sample_member_data)
-        self.assertIn("SkyBlockProfileMember UUID: uuid1", str(member))
+        self.assertIn("SkyBlockProfileMember Username: Unknown, UUID: uuid1", str(member))
 
 class TestPlayerData(unittest.TestCase):
 
