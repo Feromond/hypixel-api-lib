@@ -1,4 +1,4 @@
-from hypixel_api_lib.Elections import Elections
+from hypixel_api_lib import Elections
 
 elections = Elections()
 current_mayor = elections.get_mayor()
