@@ -1,6 +1,8 @@
 from datetime import datetime
 import requests
 from hypixel_api_lib.utils import convert_timestamp
+import re
+from difflib import get_close_matches
 
 BAZAAR_API_URL = "https://api.hypixel.net/skyblock/bazaar"
 
@@ -100,12 +102,37 @@ class Bazaar:
     Attributes:
         last_updated (datetime): The timestamp of the last update.
         products (dict of str to BazaarProduct): The bazaar products.
+        normalized_product_ids (dict of str to str): Mapping of normalized product names to actual product IDs.
     """
+
+    COMMON_PREFIXES = [
+        "ENCHANTMENT_ULTIMATE_",
+        "ENCHANTMENT_",
+        "DUNGEON_",
+    ]
+
+    COMMON_SUFFIXES = [
+        "_ITEM",
+        "_SCROLL",
+        "_GEM",
+        "_ORE",
+        "_1",
+        "_2",
+        "_3",
+        "_4",
+        "_5",
+        "_6",
+        "_7",
+        "_8",
+        "_9",
+        "_10",
+    ]
 
     def __init__(self, api_endpoint: str = BAZAAR_API_URL) -> None:
         self.api_endpoint: str = api_endpoint
         self.last_updated: datetime | None = None
         self.products: dict[str, BazaarProduct] = {}
+        self.normalized_product_ids: dict[str, str] = {}
         self._load_bazaar_data()
 
     def _load_bazaar_data(self) -> None:
@@ -120,17 +147,86 @@ class Bazaar:
                 products_data = data.get('products', {})
                 for product_id, product_data in products_data.items():
                     self.products[product_id] = BazaarProduct(product_id, product_data)
+                    normalized_id = self._normalize_product_id(product_id)
+                    self.normalized_product_ids[normalized_id] = product_id
             else:
                 raise ValueError("Failed to fetch bazaar data")
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"An error occurred: {e}")
 
-    def get_product_by_id(self, product_id: str) -> BazaarProduct | None:
+    def _normalize_product_id(self, product_id: str) -> str:
+        """Normalize the product ID for easier searching."""
+        normalized = product_id.upper()
+        for prefix in self.COMMON_PREFIXES:
+            if normalized.startswith(prefix):
+                normalized = normalized[len(prefix):]
+                break
+        for suffix in self.COMMON_SUFFIXES:
+            if normalized.endswith(suffix):
+                normalized = normalized[:-len(suffix)]
+                break
+        normalized = re.sub(r'[^A-Z0-9]', '_', normalized)
+        return normalized
+
+    def search_product(self, search_term: str) -> BazaarProduct | None:
         """
-        Retrieve a product by its ID.
+        Search for a product using a search term.
 
         Args:
-            product_id (str): The ID of the product.
+            search_term (str): The search term provided by the user.
+
+        Returns:
+            BazaarProduct or None: The matching BazaarProduct object, or None if not found.
+        """
+        normalized_search = self._normalize_search_term(search_term)
+        product_id = self.normalized_product_ids.get(normalized_search)
+        if product_id and product_id in self.products:
+            return self.products[product_id]
+        possible_ids = self._generate_possible_product_ids(normalized_search)
+        for pid in possible_ids:
+            if pid in self.products:
+                return self.products[pid]
+        return self._fuzzy_search(normalized_search)
+
+    def _normalize_search_term(self, search_term: str) -> str:
+        """Normalize the search term to match normalized product IDs."""
+        normalized = search_term.upper().replace(' ', '_')
+        normalized = re.sub(r'[^A-Z0-9]', '_', normalized)
+        return normalized
+
+    def _generate_possible_product_ids(self, base_term: str) -> list[str]:
+        """Generate possible product IDs by adding common prefixes and suffixes."""
+        possible_ids = []
+        for prefix in [''] + self.COMMON_PREFIXES:
+            term_with_prefix = prefix + base_term
+            for suffix in [''] + self.COMMON_SUFFIXES:
+                possible_id = term_with_prefix + suffix
+                possible_ids.append(possible_id)
+        possible_ids = list(set(possible_ids))
+        return possible_ids
+
+    # TODO: Potentially consider changing some of this class to be able to search and pass back multiple products
+    #   if a search is not clear enough. (e.x. ENCHANTMENT_ULTIMATE_WISDOM_1, ENCHANTMENT_ULTIMATE_WISDOM_2, 
+    #   ENCHANTMENT_ULTIMATE_WISDOM_3, etc..)
+    def _fuzzy_search(self, normalized_search: str) -> BazaarProduct | None:
+        """Perform a simple fuzzy search to find the closest matching product."""
+        possible_matches = get_close_matches(
+            normalized_search,
+            self.normalized_product_ids.keys(),
+            n=1,
+            cutoff=0.6
+        )
+        if possible_matches:
+            matched_id = self.normalized_product_ids[possible_matches[0]]
+            return self.products.get(matched_id)
+        return None
+
+    def get_product_by_id(self, product_id: str) -> BazaarProduct | None:
+        """
+        Retrieve a product by its exact ID.
+
+        Args:
+            product_id (str): The exact ID of the product.
 
         Returns:
             BazaarProduct or None: The BazaarProduct object, or None if not found.
