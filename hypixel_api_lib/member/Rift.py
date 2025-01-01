@@ -140,6 +140,16 @@ class WyldWoods:
     def __str__(self) -> str:
         return f"WyldWoods(Talked to Three Brothers: {self.talked_threebrothers}, Sirius Started Q&A: {self.sirius_started_q_a}, Bug Hunter Step: {self.bughunter_step}, Sirius Q&A Chain Done: {self.sirius_q_a_chain_done}, Sirius Claimed Doubloon: {self.sirius_claimed_doubloon})"
 
+class Castle:
+    # TODO: Verify there are no more hidden possible fields in the castle data. This is a new addition from a recent update to the rift
+    def __init__(self, data:dict) -> None:
+        self.unlocked_pathway_skip: bool = data.get("unlocked_pathway_skip", False)
+        self.fairy_step: int = data.get("fairy_step", 0)
+        self.grubber_stacks: int = data.get("grubber_stacks", 0)
+    
+    def __str__(self) -> str:
+        return f"Castle(Unlocked Pathway Skip: {self.unlocked_pathway_skip}, Fairy Steps: {self.fairy_step}, Grubber Stacks: {self.grubber_stacks})"
+
 
 class RiftData:
     """
@@ -156,6 +166,7 @@ class RiftData:
         west_village (WestVillage): West Village data.
         wyld_woods (WyldWoods): Wyld Woods data.
         lifetime_purchased_boundaries (list): List of purchased boundaries.
+        castle (Castle): Data related to the castle
         access (dict): Access data.
         dreadfarm (dict): Dreadfarm data.
         inventory (InventoryData): Inventory data.
@@ -175,6 +186,7 @@ class RiftData:
         self.west_village: WestVillage = WestVillage(data.get('west_village', {}))
         self.wyld_woods: WyldWoods = WyldWoods(data.get('wyld_woods', {}))
         self.lifetime_purchased_boundaries: list = data.get('lifetime_purchased_boundaries', [])
+        self.castle: Castle = Castle(data.get("castle", {}))
         self.access: dict = data.get('access', {})
         self.dreadfarm: dict = data.get('dreadfarm', {})
 
@@ -196,6 +208,7 @@ class RiftData:
             f"  West Village: {self.west_village},\n"
             f"  Wyld Woods: {self.wyld_woods},\n"
             f"  Lifetime Purchased Boundaries: {self.lifetime_purchased_boundaries},\n"
+            f"  Castle: {self.castle},\n"
             f"  Access: {self.access},\n"
             f"  Dreadfarm: {self.dreadfarm},\n"
             f"  Inventory: {self.inventory},\n"
