@@ -42,6 +42,24 @@ class RiftStats:
         west_cake_part_eaten (float): Number of cake parts eaten in the western area.
         west_hot_dogs_given (float): Number of hot dogs given in the western area.
         west_vermin_vacuumed (Dict[str, float]): Vermin vacuumed in the western area, categorized by type.
+        dreadfarm_caducous_harvested (float): Number of caducous harvested in the Dreadfarm.
+        dreadfarm_wilted_harvested (float): Number of wilted crops harvested in the Dreadfarm.
+        dreadfarm_agaricus_harvested (float): Number of agaricus harvested in the Dreadfarm.
+        dreadfarm_chicken_killed (float): Number of chickens killed in the Dreadfarm.
+        popped_balloons (float): Number of balloons popped.
+        dreadfarm_riftwarts_harvested (float): Number of riftwarts harvested in the Dreadfarm.
+        dreadfarm_bean_bulb_collected (float): Number of bean bulbs collected in the Dreadfarm.
+        plaza_red_light_deaths (float): Number of deaths by red light in the plaza.
+        plaza_horsezooka_shot (float): Number of horsezooka shots fired in the plaza.
+        living_metal_spawnegg_used (float): Number of living metal spawn eggs used.
+        living_metal_piece_maxed (float): Number of living metal pieces that have been maxed out.
+        living_cave_snake_collected (float): Number of living cave snakes collected.
+        colosseum_globowls_at_tentacle (float): Number of globowls thrown at a tentacle in the colosseum.
+        colosseum_blaster_shots (float): Number of blaster shots fired in the colosseum.
+        colosseum_bacte_defeated (float): Number of bacte defeated in the colosseum.
+        plaza_pillar_deaths (float): Number of deaths by the plaza pillar.
+        castle_sent_to_prison (float): Number of times sent to prison in the castle.
+        castle_effigy_broken (float): Number of effigies broken in the castle.
     """
 
     def __init__(self, data: dict) -> None:
@@ -56,7 +74,25 @@ class RiftStats:
         self.lagoon_rocks_game_complete: float = data.get('lagoon_rocks_game_complete', 0.0)
         self.west_cake_part_eaten: float = data.get('west_cake_part_eaten', 0.0)
         self.west_hot_dogs_given: float = data.get('west_hot_dogs_given', 0.0)
-        self.west_vermin_vacuumed: dict[str,float] = data.get('west_vermin_vacuumed', {})
+        self.west_vermin_vacuumed: dict[str, float] = data.get('west_vermin_vacuumed', {})
+        self.dreadfarm_caducous_harvested: float = data.get('dreadfarm_caducous_harvested', 0.0)
+        self.dreadfarm_wilted_harvested: float = data.get('dreadfarm_wilted_harvested', 0.0)
+        self.dreadfarm_agaricus_harvested: float = data.get('dreadfarm_agaricus_harvested', 0.0)
+        self.dreadfarm_chicken_killed: float = data.get('dreadfarm_chicken_killed', 0.0)
+        self.popped_balloons: float = data.get('popped_balloons', 0.0)
+        self.dreadfarm_riftwarts_harvested: float = data.get('dreadfarm_riftwarts_harvested', 0.0)
+        self.dreadfarm_bean_bulb_collected: float = data.get('dreadfarm_bean_bulb_collected', 0.0)
+        self.plaza_red_light_deaths: float = data.get('plaza_red_light_deaths', 0.0)
+        self.plaza_horsezooka_shot: float = data.get('plaza_horsezooka_shot', 0.0)
+        self.living_metal_spawnegg_used: float = data.get('living_metal_spawnegg_used', 0.0)
+        self.living_metal_piece_maxed: float = data.get('living_metal_piece_maxed', 0.0)
+        self.living_cave_snake_collected: float = data.get('living_cave_snake_collected', 0.0)
+        self.colosseum_globowls_at_tentacle: float = data.get('colosseum_globowls_at_tentacle', 0.0)
+        self.colosseum_blaster_shots: float = data.get('colosseum_blaster_shots', 0.0)
+        self.colosseum_bacte_defeated: float = data.get('colosseum_bacte_defeated', 0.0)
+        self.plaza_pillar_deaths: float = data.get('plaza_pillar_deaths', 0.0)
+        self.castle_sent_to_prison: float = data.get('castle_sent_to_prison', 0.0)
+        self.castle_effigy_broken: float = data.get('castle_effigy_broken', 0.0)
 
     def total_vermin_vacuumed(self) -> float:
         """
@@ -69,7 +105,8 @@ class RiftStats:
 
     def __str__(self) -> str:
         return (
-            f"RiftStats(visits={self.visits}, pass_consumed={self.pass_consumed}, "
+            f"RiftStats("
+            f"visits={self.visits}, pass_consumed={self.pass_consumed}, "
             f"lifetime_motes_earned={self.lifetime_motes_earned}, motes_orb_pickup={self.motes_orb_pickup}, "
             f"woods_larva_killed={self.woods_larva_killed}, woods_odonata_bottled={self.woods_odonata_bottled}, "
             f"lagoon_mushroom_popped_out={self.lagoon_mushroom_popped_out}, "
@@ -77,8 +114,28 @@ class RiftStats:
             f"lagoon_rocks_game_complete={self.lagoon_rocks_game_complete}, "
             f"west_cake_part_eaten={self.west_cake_part_eaten}, "
             f"west_hot_dogs_given={self.west_hot_dogs_given}, "
-            f"west_vermin_vacuumed={self.west_vermin_vacuumed})"
+            f"west_vermin_vacuumed={self.west_vermin_vacuumed}, "
+            f"dreadfarm_caducous_harvested={self.dreadfarm_caducous_harvested}, "
+            f"dreadfarm_wilted_harvested={self.dreadfarm_wilted_harvested}, "
+            f"dreadfarm_agaricus_harvested={self.dreadfarm_agaricus_harvested}, "
+            f"dreadfarm_chicken_killed={self.dreadfarm_chicken_killed}, "
+            f"popped_balloons={self.popped_balloons}, "
+            f"dreadfarm_riftwarts_harvested={self.dreadfarm_riftwarts_harvested}, "
+            f"dreadfarm_bean_bulb_collected={self.dreadfarm_bean_bulb_collected}, "
+            f"plaza_red_light_deaths={self.plaza_red_light_deaths}, "
+            f"plaza_horsezooka_shot={self.plaza_horsezooka_shot}, "
+            f"living_metal_spawnegg_used={self.living_metal_spawnegg_used}, "
+            f"living_metal_piece_maxed={self.living_metal_piece_maxed}, "
+            f"living_cave_snake_collected={self.living_cave_snake_collected}, "
+            f"colosseum_globowls_at_tentacle={self.colosseum_globowls_at_tentacle}, "
+            f"colosseum_blaster_shots={self.colosseum_blaster_shots}, "
+            f"colosseum_bacte_defeated={self.colosseum_bacte_defeated}, "
+            f"plaza_pillar_deaths={self.plaza_pillar_deaths}, "
+            f"castle_sent_to_prison={self.castle_sent_to_prison}, "
+            f"castle_effigy_broken={self.castle_effigy_broken}"
+            f")"
         )
+
 
 class MythosStats:
     """
