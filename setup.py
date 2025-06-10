@@ -11,6 +11,6 @@ setup(
     url='https://github.com/feromond/hypixel-api-lib',
     packages=find_packages(exclude=['tests']),
     install_requires=[  
-        'requests==2.32.3',
+        'requests==2.32.4',
     ],
 )
